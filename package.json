@@ -1,18 +1,19 @@
 {
-  "name": "AIArtNewsApp",
-  "version": "1.0.0",
-  "description": "AI Art News website",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "socket.io": "^4.5.1"
-  },
-  "engines": {
-    "node": ">=14.0.0"
-  },
-  "author": "Yueyi (Lulu) Wang",
-  "license": "ISC"
-}
+    "name": "socket-chat-example",
+    "version": "1.0.0",
+    "description": "AI Art News website",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js"
+    },
+    "dependencies": {
+      "express": "^4.19.2",
+      "socket.io": "^4.5.1"
+    },
+    "engines": {
+      "node": ">=14.0.0"
+    },
+    "author": "Yueyi (Lulu) Wang",
+    "license": "ISC"
+  }
+  
