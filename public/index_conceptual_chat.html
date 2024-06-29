@@ -1,0 +1,333 @@
+<!-- recently most updated website -->
+<!-- support collaborative conceptual art creation -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIsty</title>
+    <style>
+
+        
+        body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        #form, #image-form, #bio-form, #conceptual-form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; right: 0; width: 30%; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); z-index: 9999;}
+        #input, #image-input, #bio-form, #conceptual-form { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem;z-index: 9999; }
+        #input:focus, #image-input:focus, #bio-form, #conceptual-form:focus { outline: none;z-index: 9999; }
+        #form > button, #image-form > button, #bio-form > button , #conceptual-form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; z-index: 9999;}
+        #messages { list-style-type: none; margin: 0; padding: 0; position: fixed; top: 0; bottom: 100px; right: 0; width: 30%; overflow-y: scroll; z-index: 9999;}
+        #messages > li { padding: 0.5rem 1rem;z-index: 9999; }
+        #messages > li:nth-child(odd) { background: #efefef;   z-index: 9999;}
+
+        #hide-button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; position: fixed; bottom: 0; right: 0; z-index: 9999;}
+     
+
+
+        #top-image {
+         position: absolute;
+         top: 0;
+         left: 0;
+         width: 130%;
+         z-index: 8888;
+        }
+
+        #logo-display {
+         position: absolute;
+         top: 0;
+                  left: 30%;
+         width: 5%;
+         z-index: 777;
+        }
+
+
+
+        #topic-display { margin: 30px 20px 0;  width: 60%; font-size: 44px; padding: 10px 0; font-weight: bold; font-family: 'Palatino', Palatino, serif; z-index: 9999; /* Make sure this is on top or adjust as necessary */
+    color: black; }
+        #name-display { margin: 5px 20px 0; width: 70%; font-size: 26px; padding: 5px 0;font-family: 'Palatino', Palatino, serif; }
+        #image-display, #another-display  { margin: 20px 13.5% 0;  top: 150; width: 70%; }
+        img { max-width: 50%; height: auto; }
+        #description-display { 
+            text-align: center; 
+            
+            width: 50%; 
+            margin: 20px 90px 0; 
+            
+            font-family: 'Palatino', Palatino, serif;
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        #label-display { 
+        text-align: center; 
+        width: 50%; 
+    
+        margin: 5px 90px 0; 
+        font-family: 'Palatino', Palatino, serif;
+        color: grey; 
+    font-style: italic; 
+        line-height: 1.7;
+        font-size: 12px;
+        }
+
+
+        #about-display, #bio-title-display,#similar-display { 
+        text-align: center; 
+        width: 50%; 
+    
+        margin: 20px 90px 0; 
+        font-family: 'Palatino', Palatino, serif;
+        font-weight: bold;
+        line-height: 1.7;
+        font-size: 25px;
+        }
+        #bio-display { 
+    text-align: center; 
+    width: 50%; 
+    
+    margin: 13px 90px 0; 
+    font-family: 'Palatino', Palatino, serif;
+    line-height: 1.7;
+    font-size: 17px;
+}
+   </style>
+   <link rel="stylesheet" href="style1.css">
+</head>
+<body>
+    <div class="navbar" id="navbar" style="display: none;">
+        <div class="navbar-container">
+            <h1>AIrtsy</h1>
+            <ul class="nav-links">
+                <li><a href="#">Exhibitions</a></li>
+                <li><a href="#">Artists</a></li>
+                <li><a href="#">Fairs & Collecting</a></li>
+                <li><a href="#">Quarterly</a></li>
+                <li><a href="#">News</a></li>
+                <li><a href="#">Locations</a></li>
+                <li><a href="#">Shop</a></li>
+                <li><a href="#">Premieres</a></li>
+            </ul>
+            <ul class="nav-actions">
+                <li><a href="#">Follow</a></li>
+                <li><a href="#">Search</a></li>
+            </ul>
+        </div>
+        <div class="event-info">
+            Opening reception: Wednesday, May 9, 6–8pm
+        </div>
+    </div>
+
+
+    <div id="logo-display">
+        <img src="Artsy_logo.svg.png" alt="logo-note" style="width: 70%;">
+    </div>
+    <div id="topic-display"></div>
+    <div id="name-display"></div>
+    <div id="image-display"></div>
+
+    <div id="label-display"></div>
+    <div id="about-display"></div>
+    <div id="description-display"></div>
+    <div id="image-display-mid"></div>
+    <div id="bio-title-display"></div>
+    <div id="bio-display"></div>
+
+    <div id="similar-display"></div>
+    <div id="another-display"></div>
+
+    <div id="end-image-display" style="margin: 20px 0 0; width: 120%; position: relative; left: 0; bottom: 0;">
+        <img src="foot.png" alt="foot-note" style="width: 100%;">
+    </div>
+
+    <div id="top-image" >
+        <img src="artsy.jpg" alt="top-note" style="width: 100%;">
+    </div>
+    
+    
+
+    <ul id="messages"></ul>
+   
+    <form id="image-form" style="bottom: 100px;">
+        <input id="image-input" autocomplete="off" placeholder="Enter your chat message" /><button>Chat Submit</button>
+    </form>
+
+    <form id="conceptual-form" style="bottom: 200px;">
+        <input id="theme-input" autocomplete="off" placeholder="any theme" />
+        <input id="imagery-input" autocomplete="off" placeholder="any imagery" />
+        <button type="button" onclick="submitConceptualForm()">Submit</button>
+    </form>
+
+    <form id="bio-form" style="bottom: 150px;">
+        <input id="name-input" autocomplete="off" placeholder="any name" />
+        <input id="bio-input" autocomplete="off" placeholder="any identity" />
+        <button type="button" onclick="submitBioForm()">Submit</button>
+    </form>
+    <button id="hide-button" onclick="hideImage()">Disclose</button>
+
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const messages = document.getElementById('messages');
+        const imageForm = document.getElementById('image-form');
+        const imageInput = document.getElementById('image-input');
+        const imageDisplay = document.getElementById('image-display');
+
+        const anotherDisplay = document.getElementById('another-display');
+
+        const descriptionDisplay = document.getElementById('description-display');
+        const imageDisplayMid = document.getElementById('image-display-mid');
+        const mergeButton = document.getElementById('merge-btn');
+
+        const conceptualform = document.getElementById('conceptual-form');
+        const themeInput = document.getElementById('theme-input');
+        const imageryInput = document.getElementById('imagery-input');
+
+        const bioForm = document.getElementById('bio-form');
+        const nameInput = document.getElementById('name-input');
+        const bioInput = document.getElementById('bio-input');
+
+        const topicDisplay = document.getElementById('topic-display');
+        const nameDisplay = document.getElementById('name-display');
+
+        const bioTitleDisplay = document.getElementById('bio-title-display');
+
+        const bioDisplay = document.getElementById('bio-display');
+        const aboutDisplay = document.getElementById('about-display');
+        const similarDisplay = document.getElementById('similar-display');
+        const labelDisplay = document.getElementById('label-display');
+
+
+        function submitConceptualForm() {
+            event.preventDefault();
+            
+            socket.emit('submit concept', { theme: themeInput.value,imagery: imageryInput.value });
+            const chat_theme = "Theme: " + themeInput.value;
+            const chat_Imagery = "Imagery: " + imageryInput.value;
+            socket.emit('submit chat', chat_theme);
+            socket.emit('submit chat', chat_Imagery);
+            themeInput.value = '';
+            imageryInput.value = '';
+
+        
+           
+        }
+        function hideImage() {
+         document.getElementById('top-image').style.display = 'none';
+        }
+
+        function submitBioForm() {
+            event.preventDefault();
+            
+            socket.emit('submit bio', { name: nameInput.value,bio: bioInput.value });
+            console.log('Emitting bio:', bioInput.value); 
+            
+            const chat_name = "Name: " + nameInput.value;
+            const chat_bio = "Identity: " + bioInput.value;
+            socket.emit('submit chat', chat_name);
+            socket.emit('submit chat', chat_bio);
+
+
+            socket.emit('submit header', nameInput.value);
+            nameInput.value = '';
+            bioInput.value = '';
+           
+        }
+
+        socket.on('new header',(name) => {
+            nameDisplay.textContent = name;
+            var navbar = document.getElementById('navbar');
+            if (navbar.style.display === "none") {
+                navbar.style.display = "block";
+                this.textContent = "Hide Navbar";
+            } else {
+                navbar.style.display = "none";
+                this.textContent = "Show Navbar";
+            }
+       });
+
+imageForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (imageInput.value) {
+        const prompt = "Chat: " + imageInput.value;
+        console.socket-chat-example('Emitting chat:', prompt); // Check what is being sent
+        socket.emit('submit chat', prompt);
+        imageInput.value = '';
+    }
+});
+
+socket.on('new label and article title', (prompt) => {
+            socket.emit('submit label', prompt);
+            socket.emit('submit title', prompt);
+
+});
+
+     
+        socket.on('new chat', (prompt) => {
+            const promptItem = document.createElement('li');
+            promptItem.textContent =  prompt;
+            messages.appendChild(promptItem);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+
+        socket.on('new title', (title) => {
+    if(title) {
+        document.getElementById('topic-display').textContent = title;
+    } else {
+        console.log("Title data is undefined or null");
+    }
+});
+
+
+
+        socket.on('new image', (imageURL) => {
+            imageDisplay.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>`;
+        });
+
+        socket.on('new image 2', (imageURL) => {
+            anotherDisplay.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>`;
+            similarDisplay.textContent = "Similar Works";
+        });
+
+        socket.on('new description', (description) => {
+           // if (data.imageId === 'image1') {
+            descriptionDisplay.textContent = description;
+            aboutDisplay.textContent = "About";
+           // description = description.substring(0, 100);
+           
+            //}
+        });
+
+
+        socket.on('new label', (description) => {
+            labelDisplay.textContent = description;
+            
+        });
+
+
+        socket.on('new bio', (description) => {
+            bioDisplay.textContent = description;
+            bioTitleDisplay.textContent = "Artist Bio";
+       });
+
+
+     
+
+
+
+
+
+        socket.on('new image middle', (imageURL) => {
+            imageDisplayMid.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>` + imageDisplayMid.innerHTML;
+        });
+
+        socket.on('error', (errorMsg) => {
+            imageDisplay.textContent = 'Error: ' + errorMsg;
+        });
+
+        socket.on('connect_error', (err) => {
+    console.log(`connect_error due to ${err.message}`);
+});
+
+    </script>
+</body>
+</html>

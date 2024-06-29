@@ -1,0 +1,46 @@
+body, h1, ul, li, a {
+    margin: 0;
+    padding: 0;
+    font-family: 'Palatino', Palatino, serif;
+}
+
+.navbar {
+    width: 60%;
+    border-bottom: 1px solid black;
+    padding: 20px;
+}
+
+.navbar-container h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    font-family: 'Palatino', Palatino, serif;
+}
+
+.nav-links, .nav-actions {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-family: 'Palatino', Palatino, serif;
+}
+
+.nav-links li a, .nav-actions li a {
+    text-decoration: none;
+    color: black;
+}
+
+.event-info {
+    font-size: 14px;
+    margin-top: 10px;
+    font-family: 'Palatino', Palatino, serif;
+}
+
+@media (max-width: 700px) {
+    .navbar-container {
+        flex-direction: column;
+    }
+    .nav-links, .nav-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
