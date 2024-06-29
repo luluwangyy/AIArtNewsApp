@@ -1,0 +1,2 @@
+# AIArtNewsAPp
+for heroku deploy
