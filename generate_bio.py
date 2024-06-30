@@ -1,17 +1,7 @@
-# this generates the artist bio
-
-
-
 import replicate
 import os
 import sys
 import json
-
-# Set your API token
-
-from dotenv import load_dotenv
-load_dotenv()
-os.environ["REPLICATE_API_TOKEN"] = os.getenv('REPLICATE_API_TOKEN')
 
 def generate_bio(name, bio):
     for event in replicate.stream(
@@ -31,8 +21,15 @@ def generate_bio(name, bio):
         print(str(event), end="")
 
 if __name__ == "__main__":
+    if len(sys.argv) != 4:
+        print("Usage: python generate_bio.py <name> <bio> <replicate_api_key>")
+        sys.exit(1)
+
     name = sys.argv[1]
     bio = sys.argv[2]
-    #bio = "a girl from china and is queer"
-    generate_bio(name,bio)
-    
+    replicate_api_key = sys.argv[3]
+
+    # Set API key
+    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+
+    generate_bio(name, bio)

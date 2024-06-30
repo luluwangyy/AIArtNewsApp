@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key Input</title>
+</head>
+<body>
+    <h1>Enter Your API Keys</h1>
+    <form id="api-key-form">
+        <label for="replicateApiKey">Replicate API Key:</label>
+        <input type="text" id="replicateApiKey" name="replicateApiKey" required>
+        <br><br>
+        <label for="openaiApiKey">OpenAI API Key:</label>
+        <input type="text" id="openaiApiKey" name="openaiApiKey" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <button id="next-button" style="display:none;">Next</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        document.getElementById('api-key-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const replicateApiKey = document.getElementById('replicateApiKey').value;
+            const openaiApiKey = document.getElementById('openaiApiKey').value;
+            socket.emit('submit api keys', { replicateApiKey, openaiApiKey });
+            
+            // Show the "Next" button after submitting the API keys
+            document.getElementById('next-button').style.display = 'block';
+        });
+
+        document.getElementById('next-button').addEventListener('click', function() {
+            window.location.href = 'index_conceptual_chat.html';
+        });
+    </script>
+</body>
+</html>

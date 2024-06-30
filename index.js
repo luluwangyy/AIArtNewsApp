@@ -59,8 +59,17 @@ let imageUrls = [];
 io.on('connection', (socket) => {
   console.log('A user connected');
 
+  // Listen for the submission of API keys
+  socket.on('submit api keys', (data) => {
+    console.log('API Keys received:', data);
+    socket.handshake.session.replicateApiKey = data.replicateApiKey;
+    socket.handshake.session.openaiApiKey = data.openaiApiKey;
+    socket.handshake.session.save();
+  });
+
   socket.on('submit title', (data) => {
-    const command = `python3 generate_title.py "${data}"`;
+    const replicateApiKey = socket.handshake.session.replicateApiKey;
+    const command = `python3 generate_title.py "${data}" "${replicateApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
@@ -73,8 +82,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit bio', (data) => {
+    const replicateApiKey = socket.handshake.session.replicateApiKey;
     const { name, bio } = data;
-    const command = `python3 generate_bio.py "${name}" "${bio}"`;
+    const command = `python3 generate_bio.py "${name}" "${bio}" "${replicateApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
@@ -95,7 +105,9 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit label', (data) => {
-    exec(`python3 generate_label.py "${data}"`, (error, stdout, stderr) => {
+    const replicateApiKey = socket.handshake.session.replicateApiKey;
+    const command = `python3 generate_label.py "${data}" "${replicateApiKey}"`;
+    exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
         io.emit('error', 'Failed to generate label');
@@ -111,8 +123,10 @@ io.on('connection', (socket) => {
     io.emit('submit concept', prompt);
 
     const { theme, imagery } = prompt;
-    const command_idea = `python3 generate_conceptualart.py "${theme}" "${imagery}"`;
-    const command_idea2 = `python3 generate_conceptualart2.py "${theme}" "${imagery}"`;
+    const replicateApiKey = socket.handshake.session.replicateApiKey;
+    const openaiApiKey = socket.handshake.session.openaiApiKey;
+    const command_idea = `python3 generate_conceptualart.py "${theme}" "${imagery}" "${replicateApiKey}" "${openaiApiKey}"`;
+    const command_idea2 = `python3 generate_conceptualart2.py "${theme}" "${imagery}" "${replicateApiKey}" "${openaiApiKey}"`;
 
     exec(command_idea, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -149,7 +163,7 @@ io.on('connection', (socket) => {
     exec(command_idea2, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
-        callback('Failed to generate image');
+        io.emit('error', 'Failed to generate image');
         return;
       }
       try {
@@ -178,39 +192,12 @@ io.on('connection', (socket) => {
     });
   });
 
-  socket.on('merge_image', () => {
-    console.log('Received merge image event');
-
-    if (imageUrls.length < 2) {
-      io.emit('error', 'Not enough image URLs for merging');
-      return;
-    }
-
-    exec(`python3 generate_blend_image.py "${imageUrls[0]}" "${imageUrls[1]}"`, (error, stdout, stderr) => {
-      if (error || stderr) {
-        console.error('Error executing Python script:', error, stderr);
-        io.emit('error', 'Failed to generate merged image');
-        return;
-      }
-      try {
-        const matches = stdout.match(/https:\/\/[^"]+/);
-        if (matches && matches[0]) {
-          io.emit('new image middle', matches[0]);
-        } else {
-          io.emit('error', 'No image URL found');
-          console.error('No URL found in Python script output:', stdout);
-        }
-      } catch (err) {
-        console.error('Error processing output:', err);
-        io.emit('error', 'Error processing merged image data');
-      }
-    });
-  });
 });
 
 app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'public/home.html'));
 });
+
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

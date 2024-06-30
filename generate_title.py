@@ -9,9 +9,6 @@ import json
 # Set your API token
 
 
-from dotenv import load_dotenv
-load_dotenv()
-os.environ["REPLICATE_API_TOKEN"] = os.getenv('REPLICATE_API_TOKEN')
 
 def generate_title(description):
     for event in replicate.stream(
@@ -33,6 +30,11 @@ def generate_title(description):
 if __name__ == "__main__":
     description = sys.argv[1]
     
-    #bio = "a girl from china and is queer"
+    replicate_api_key = sys.argv[3]
+
+    # Set API key
+    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+
+   
     generate_title(description)
     

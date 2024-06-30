@@ -7,9 +7,7 @@ import json
 
 # Set your API token
 
-from dotenv import load_dotenv
-load_dotenv()
-os.environ["REPLICATE_API_TOKEN"] = os.getenv('REPLICATE_API_TOKEN')
+
 
 def generate_label(description):
     for event in replicate.stream(
@@ -30,4 +28,11 @@ def generate_label(description):
 
 if __name__ == "__main__":
     description = sys.argv[1]
+   
+
+    replicate_api_key = sys.argv[3]
+
+    # Set API key
+    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+
     generate_label(description)
