@@ -4,22 +4,23 @@
     "description": "AI Art News website",
     "main": "index.js",
     "scripts": {
-      "start": "node index.js"
+        "start": "node index.js"
     },
     "dependencies": {
-      "express": "^4.19.2",
-      "socket.io": "^4.5.1",
-      "body-parser": "^1.19.0",
-      "express-session": "^1.17.1",
-      "passport": "^0.4.1",
-      "passport-local": "^1.0.0",
-      "axios": "^0.21.1",
-      "dotenv": "^8.2.0"
+        "axios": "^0.21.1",
+        "body-parser": "^1.19.0",
+        "dotenv": "^8.2.0",
+        "express": "^4.19.2",
+        "express-session": "^1.17.1",
+        "openai": "^4.52.2",
+        "passport": "^0.4.1",
+        "passport-local": "^1.0.0",
+        "replicate": "^0.30.2",
+        "socket.io": "^4.5.1"
     },
     "engines": {
-      "node": ">=14.0.0"
+        "node": ">=14.0.0"
     },
     "author": "Yueyi (Lulu) Wang",
     "license": "ISC"
-  }
-  
+}
