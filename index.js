@@ -56,19 +56,20 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 let prompts = [];
 let imageUrls = [];
 
+let replicateApiKey = '';
+let openaiApiKey = '';
+
 io.on('connection', (socket) => {
   console.log('A user connected');
 
   // Listen for the submission of API keys
   socket.on('submit api keys', (data) => {
     console.log('API Keys received:', data);
-    socket.handshake.session.replicateApiKey = data.replicateApiKey;
-    socket.handshake.session.openaiApiKey = data.openaiApiKey;
-    socket.handshake.session.save();
+    replicateApiKey = data.replicateApiKey;
+    openaiApiKey = data.openaiApiKey;
   });
 
   socket.on('submit title', (data) => {
-    const replicateApiKey = socket.handshake.session.replicateApiKey;
     const command = `python3 generate_title.py "${data}" "${replicateApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -82,7 +83,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit bio', (data) => {
-    const replicateApiKey = socket.handshake.session.replicateApiKey;
+  
     const { name, bio } = data;
     const command = `python3 generate_bio.py "${name}" "${bio}" "${replicateApiKey}"`;
     exec(command, (error, stdout, stderr) => {
@@ -105,7 +106,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit label', (data) => {
-    const replicateApiKey = socket.handshake.session.replicateApiKey;
+  
     const command = `python3 generate_label.py "${data}" "${replicateApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -123,8 +124,7 @@ io.on('connection', (socket) => {
     io.emit('submit concept', prompt);
 
     const { theme, imagery } = prompt;
-    const replicateApiKey = socket.handshake.session.replicateApiKey;
-    const openaiApiKey = socket.handshake.session.openaiApiKey;
+    
     const command_idea = `python3 generate_conceptualart.py "${theme}" "${imagery}" "${replicateApiKey}" "${openaiApiKey}"`;
     const command_idea2 = `python3 generate_conceptualart2.py "${theme}" "${imagery}" "${replicateApiKey}" "${openaiApiKey}"`;
 
@@ -140,11 +140,16 @@ io.on('connection', (socket) => {
         const titleLine = outputParts.find(line => line.startsWith('Title:'));
         const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
         io.emit("new label and article title", title);
+        
         const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
-        const description = outputParts.slice(descriptionStartIndex).join('\n').trim();
-
+        let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
+        
+        // Use a regular expression to remove text between [ and ]
+        description = description.replace(/\[.*?\]/g, '').trim();
+        
         console.log("Description:", description);
         io.emit('new description', description);
+        
 
         const matches = url.match(/https:\/\/[^"]+/);
         if (matches && matches[0]) {

@@ -30,7 +30,7 @@ if __name__ == "__main__":
     description = sys.argv[1]
    
 
-    replicate_api_key = sys.argv[3]
+    replicate_api_key = sys.argv[2]
 
     # Set API key
     os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
