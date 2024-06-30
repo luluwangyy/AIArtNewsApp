@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Key Input</title>
+    <style>
+        #message {
+            display: none;
+            margin-top: 10px;
+            white-space: pre-line; /* Allows line breaks */
+        }
+        .api-links {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Enter Your API Keys</h1>
@@ -17,9 +27,23 @@
         <button type="submit">Submit</button>
     </form>
     <button id="next-button" style="display:none;">Next</button>
+    
+    <div>
+        <button id="referCodeOptional">Refer Code (Optional)</button>
+        <input type="text" id="referCodeInput" placeholder="Enter Refer Code" style="display:none;">
+        <button id="referCodeSubmit" style="display:none;">Refer Code Submit</button>
+    </div>
+    <div id="message"></div>
+    
+    <div class="api-links">
+        <p>Here to get your Replicate API token: <a href="https://replicate.com/account/api-tokens" target="_blank">https://replicate.com/account/api-tokens</a></p>
+        <p>Here to get your OpenAI API token: <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a></p>
+    </div>
+    
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
+
         document.getElementById('api-key-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const replicateApiKey = document.getElementById('replicateApiKey').value;
@@ -32,6 +56,23 @@
 
         document.getElementById('next-button').addEventListener('click', function() {
             window.location.href = 'index_conceptual_chat.html';
+        });
+
+        document.getElementById('referCodeOptional').addEventListener('click', function() {
+            document.getElementById('referCodeInput').style.display = 'inline';
+            document.getElementById('referCodeSubmit').style.display = 'inline';
+        });
+
+        document.getElementById('referCodeSubmit').addEventListener('click', function() {
+            var referCode = document.getElementById('referCodeInput').value;
+            var message = document.getElementById('message');
+            
+            if (referCode.toLowerCase() === 'luluisthebest' || referCode.toLowerCase() === 'lulu is the best') {
+                message.textContent = 'thank you';
+                message.style.display = 'block';
+            } else {
+                message.style.display = 'your code is invalid';
+            }
         });
     </script>
 </body>
