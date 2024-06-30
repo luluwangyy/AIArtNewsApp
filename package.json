@@ -1,5 +1,5 @@
 {
-    "name": "ai_art_news",
+    "name": "AIArtNewsApp",
     "version": "1.0.0",
     "description": "AI Art News website",
     "main": "index.js",
