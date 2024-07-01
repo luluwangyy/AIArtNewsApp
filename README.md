@@ -1,4 +1,4 @@
-# AIArtNewsAPp
+# AIArtNewsApp
 for heroku deploy
 
 Here's the website you can play with!
