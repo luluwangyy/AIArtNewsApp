@@ -1,4 +1,7 @@
 # AIArtNewsApp
+![home page](demo_pic/AIArtNews_homepage.png)
+Here's the project page: [Project Page](https://luluyueyiwang.com/artnews/)  
+(If you see "403 Forbidden," please retype the link and load it again!)
 
 Here's the website you can play with!
 [AI Art News](https://ai-art-news-c4c974caac00.herokuapp.com)
@@ -11,6 +14,3 @@ Ultimately, I want to make the contemporary art world accessible to everyone, fo
 ## What I Created
 I developed an interactive, multi-agent website inspired by the design of Artsy and Gagosian websites. The platform allows users to generate formal art news (including article title, artist bio, two AI-generated photographs of the work, labels, and description) by inputting just four words, using Socket.io, Python, JavaScript, and OpenAI, along with Replicate API integration.
 
-## Want to Read More About My Inspiration and Workflow?
-Here's the project page: [Project Page](https://luluyueyiwang.com/artnews/)  
-(If you see "403 Forbidden," please retype the link and load it again!)
