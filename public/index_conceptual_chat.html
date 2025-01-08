@@ -38,6 +38,43 @@
         }
 
 
+    #help-button {
+        position: fixed;
+        top: 20px;
+        right: 35%;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        z-index: 9999;
+    }
+
+    #help-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 10001;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    #help-modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+
 
         #topic-display { margin: 30px 20px 0;  width: 60%; font-size: 44px; padding: 10px 0; font-weight: bold; font-family: 'Palatino', Palatino, serif; z-index: 9999; /* Make sure this is on top or adjust as necessary */
     color: black; }
@@ -91,6 +128,16 @@
    <link rel="stylesheet" href="style1.css">
 </head>
 <body>
+    <button id="help-button">How to Use</button>
+    <div id="help-modal">
+        <span id="help-modal-close">&times;</span>
+        <h2>How to Use AIsty</h2>
+        <p>1. Enter a theme and imagery in the first form</p>
+        <p>2. Enter an artist name and identity in the second form</p>
+        <p>3. Click submit on both forms</p>
+        <p>4. Wait about 10 seconds and CLICK "DISCLOSE" button on the bottom!!! Then you can see your AI-generated art news article!</p>
+    </div>
+ 
     <div class="navbar" id="navbar" style="display: none;">
         <div class="navbar-container">
             <h1>AIrtsy</h1>
@@ -164,6 +211,13 @@
     
     <script src="/socket.io/socket.io.js"></script>
     <script>
+            document.getElementById('help-button').addEventListener('click', () => {
+        document.getElementById('help-modal').style.display = 'block';
+    });
+
+    document.getElementById('help-modal-close').addEventListener('click', () => {
+        document.getElementById('help-modal').style.display = 'none';
+    });
         const socket = io();
 
         const messages = document.getElementById('messages');
