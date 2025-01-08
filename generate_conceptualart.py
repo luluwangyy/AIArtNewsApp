@@ -75,27 +75,46 @@ def generate_image_re(prompt):
         "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
         input={"prompt": description_art}
     )
-    print(json.dumps(output))
+    return output[0] if output else None  # Return the first URL
 
-if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python generate_conceptualart.py <theme> <imagery> <replicate_api_key> <openai_api_key>")
+def main():
+    try:
+        if len(sys.argv) != 5:
+            print(json.dumps({"error": "Usage: python generate_conceptualart.py <theme> <imagery> <replicate_api_key> <openai_api_key>"}))
+            sys.exit(1)
+
+        theme = sys.argv[1]
+        imagery = sys.argv[2]
+        replicate_api_key = sys.argv[3]
+        openai_api_key = sys.argv[4]
+
+        # Set API keys
+        os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+        openai.api_key = openai_api_key
+        
+        reference_conceptual = generate_conceptual_artist_reference(theme)
+        reference_visual = generate_visual_artist_reference(imagery)
+        description = generate_conceptual_idea(theme, imagery, reference_conceptual, reference_visual)
+        
+        image_url = generate_image_re(description)
+        title = f"Conceptual Art inspired by {theme}"
+
+        # Format the output as a JSON object
+        output = {
+            "url": image_url,
+            "title": title,
+            "description": description
+        }
+        
+        # Print as JSON string
+        print(json.dumps(output))
+        
+    except Exception as e:
+        error_output = {
+            "error": str(e)
+        }
+        print(json.dumps(error_output))
         sys.exit(1)
 
-    theme = sys.argv[1]
-    imagery = sys.argv[2]
-    replicate_api_key = sys.argv[3]
-    openai_api_key = sys.argv[4]
-
-
-    # Set API keys
-    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
-    openai.api_key = openai_api_key
-
-    
-    reference_conceptual = generate_conceptual_artist_reference(theme)
-    reference_visual = generate_visual_artist_reference(imagery)
-    final_idea = generate_conceptual_idea(theme, imagery, reference_conceptual, reference_visual)
-
-    generate_image_re(final_idea)
-    print(final_idea)
+if __name__ == "__main__":
+    main()
