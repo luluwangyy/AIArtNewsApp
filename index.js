@@ -131,10 +131,21 @@ io.on('connection', (socket) => {
     exec(command_idea, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
-        io.emit('error', 'Failed to generate image');
+        io.emit('error', 'Failed to generate first image');
         return;
       }
+      
       try {
+        // Parse the output as JSON first
+        const output = JSON.parse(stdout);
+        
+        // Check if there's an error in the output
+        if (output.error) {
+          console.error('Python script error:', output.error);
+          io.emit('error', output.error);
+          return;
+        }
+        
         const outputParts = stdout.split('\n');
         const url = outputParts[0];
         const titleLine = outputParts.find(line => line.startsWith('Title:'));
@@ -161,7 +172,7 @@ io.on('connection', (socket) => {
         }
       } catch (err) {
         console.error('Error processing output:', err);
-        io.emit('error', 'Error processing image data');
+        io.emit('error', 'Error processing first image data');
       }
     });
 

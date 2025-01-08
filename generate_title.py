@@ -12,17 +12,18 @@ import json
 
 def generate_title(description):
     for event in replicate.stream(
-        "mistralai/mixtral-8x7b-instruct-v0.1",
+        "mistralai/mistral-7b-v0.1",
         input={
-            "top_k": 50,
-            "top_p": 0.9,
+            "top_k": 0,
+            "top_p": 0.95,
             "prompt": f"Only write one eye-catching title of a news article about a new art show around an artwork that has this description {description} ",
-            "temperature": 0.6,
-            "system_prompt": "You are a very helpful, respectful and honest assistant.",
+            "max_tokens": 512,
+            "temperature": 0.7,
             "length_penalty": 1,
-            "max_new_tokens": 1024,
+            "max_new_tokens": 150,
             "prompt_template": "<s>[INST] {prompt} [/INST] ",
-            "presence_penalty": 0
+            "presence_penalty": 0,
+            "log_performance_metrics": False
         },
     ):
         print(str(event), end="")
