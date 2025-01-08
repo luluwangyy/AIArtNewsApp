@@ -1,48 +1,56 @@
-import replicate
 import os
 import sys
 import json
+import logging
+import openai
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def generate_bio(name, bio):
-    bio_text = ""
-    for event in replicate.stream(
-        "mistralai/mistral-7b-v0.1",
-        input={
-            "top_k": 0,
-            "top_p": 0.95,
-            "prompt": f"Write an artist bio about a visual artist whose name is {name} and whose key identity is {bio} in a coherent 5-sentence paragraph. The pronoun must be they/their/them. The output must starts with the artist name",
-            "temperature": 0.7,
-            "length_penalty": 1,
-            "max_new_tokens": 150,
-            "prompt_template": "<s>[INST] {prompt} [/INST] ",
-            "presence_penalty": 0,
-            "log_performance_metrics": False
-        },
-    ):
-        bio_text += str(event)
-    return bio_text
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"Write an artist bio about a visual artist named {name} whose identity is described as {bio}. Use they/them pronouns and create a coherent 5-sentence paragraph."
+                }
+            ],
+            temperature=0.7
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        logger.error(f"Error generating bio: {str(e)}")
+        return {"error": str(e)}
 
 def main():
     try:
         if len(sys.argv) != 4:
-            print(json.dumps({"error": "Usage: python generate_bio.py <name> <bio> <replicate_api_key>"}))
+            print(json.dumps({"error": "Usage: python generate_bio.py <name> <bio> <openai_api_key>"}))
             sys.exit(1)
 
         name = sys.argv[1]
         bio = sys.argv[2]
-        replicate_api_key = sys.argv[3]
+        openai_api_key = sys.argv[3]
 
-        # Set API key
-        os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+        # Set OpenAI API key
+        openai.api_key = openai_api_key
 
         generated_bio = generate_bio(name, bio)
         
-        # Format the output as JSON
-        output = {
-            "bio": generated_bio
-        }
-        print(json.dumps(output))
-        
+        # Check if the result is an error dictionary
+        if isinstance(generated_bio, dict) and "error" in generated_bio:
+            print(json.dumps(generated_bio))
+        else:
+            # Format the output as JSON
+            output = {
+                "bio": generated_bio
+            }
+            print(json.dumps(output))
+            
     except Exception as e:
         error_output = {
             "error": str(e)

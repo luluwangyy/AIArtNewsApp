@@ -1,5 +1,3 @@
-# This generates the first image
-
 import os
 import sys
 import json
@@ -20,11 +18,10 @@ def generate_conceptual_idea(theme, imagery, reference_conceptual, reference_vis
             ],
             temperature=0.5
         )
-        response_text = response['choices'][0]['message']['content'].strip()
-        return response_text
+        return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return []
+        print(json.dumps({"error": f"An error occurred: {str(e)}"}))
+        return None
 
 def generate_conceptual_artist_reference(theme):
     try:
@@ -36,11 +33,10 @@ def generate_conceptual_artist_reference(theme):
             ],
             temperature=0.5
         )
-        response_text = response['choices'][0]['message']['content'].strip()
-        return response_text
+        return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return []
+        print(json.dumps({"error": f"An error occurred: {str(e)}"}))
+        return None
 
 def generate_visual_artist_reference(imagery):
     try:
@@ -52,68 +48,66 @@ def generate_visual_artist_reference(imagery):
             ],
             temperature=0.5
         )
-        response_text = response['choices'][0]['message']['content'].strip()
-        return response_text
+        return response.choices[0].message.content.strip()
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return []
-
-def generate_image(description):
-    description_art = f"A realistic photo that captures an artwork in an exhibition. No words in the picture. The artwork: {description}."
-    response = openai.Image.create(
-        model="dall-e-3",
-        prompt=description_art,
-        n=1,
-        size="1024x1024"
-    )
-    image_url = response.data[0]['url']
-    print(json.dumps(image_url))
+        print(json.dumps({"error": f"An error occurred: {str(e)}"}))
+        return None
 
 def generate_image_re(prompt):
-    description_art = f"A realistic photo that captures an installation in an exhibition. No words in the picture. The artwork: {prompt}."
-    output = replicate.run(
-        "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
-        input={"prompt": description_art}
-    )
-    return output[0] if output else None  # Return the first URL
+    try:
+        description_art = f"A realistic photo that captures an installation in an exhibition. No words in the picture. The artwork: {prompt}."
+        output = replicate.run(
+            "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+            input={"prompt": description_art}
+        )
+        
+        # Convert the output list to URLs
+        if isinstance(output, list) and len(output) > 0:
+            # Get the first URL string from the output
+            url = str(output[0])  # Convert to string explicitly
+            result = {
+                "url": url,
+                "description": prompt,
+                "title": f"Conceptual Art inspired by the artwork"
+            }
+            print(json.dumps(result))
+        else:
+            print(json.dumps({"error": "No image was generated"}))
+            
+    except Exception as e:
+        print(json.dumps({"error": f"Error generating image: {str(e)}"}))
 
 def main():
+    if len(sys.argv) != 5:
+        print(json.dumps({"error": "Usage: python generate_conceptualart.py <theme> <imagery> <replicate_api_key> <openai_api_key>"}))
+        sys.exit(1)
+
+    theme = sys.argv[1]
+    imagery = sys.argv[2]
+    replicate_api_key = sys.argv[3]
+    openai_api_key = sys.argv[4]
+
+    # Set API keys
+    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+    openai.api_key = openai_api_key
+
     try:
-        if len(sys.argv) != 5:
-            print(json.dumps({"error": "Usage: python generate_conceptualart.py <theme> <imagery> <replicate_api_key> <openai_api_key>"}))
+        reference_conceptual = generate_conceptual_artist_reference(theme)
+        if not reference_conceptual:
             sys.exit(1)
 
-        theme = sys.argv[1]
-        imagery = sys.argv[2]
-        replicate_api_key = sys.argv[3]
-        openai_api_key = sys.argv[4]
-
-        # Set API keys
-        os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
-        openai.api_key = openai_api_key
-        
-        reference_conceptual = generate_conceptual_artist_reference(theme)
         reference_visual = generate_visual_artist_reference(imagery)
-        description = generate_conceptual_idea(theme, imagery, reference_conceptual, reference_visual)
-        
-        image_url = generate_image_re(description)
-        title = f"Conceptual Art inspired by {theme}"
+        if not reference_visual:
+            sys.exit(1)
 
-        # Format the output as a JSON object
-        output = {
-            "url": image_url,
-            "title": title,
-            "description": description
-        }
-        
-        # Print as JSON string
-        print(json.dumps(output))
-        
+        final_idea = generate_conceptual_idea(theme, imagery, reference_conceptual, reference_visual)
+        if not final_idea:
+            sys.exit(1)
+
+        generate_image_re(final_idea)
+
     except Exception as e:
-        error_output = {
-            "error": str(e)
-        }
-        print(json.dumps(error_output))
+        print(json.dumps({"error": str(e)}))
         sys.exit(1)
 
 if __name__ == "__main__":

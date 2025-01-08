@@ -1,41 +1,53 @@
-#generate the title
-
-
-import replicate
 import os
 import sys
 import json
+import openai
+import logging
 
-# Set your API token
-
-
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def generate_title(description):
-    for event in replicate.stream(
-        "mistralai/mistral-7b-v0.1",
-        input={
-            "top_k": 0,
-            "top_p": 0.95,
-            "prompt": f"Only write one eye-catching title of a news article about a new art show around an artwork that has this description {description} ",
-            "max_tokens": 512,
-            "temperature": 0.7,
-            "length_penalty": 1,
-            "max_new_tokens": 150,
-            "prompt_template": "<s>[INST] {prompt} [/INST] ",
-            "presence_penalty": 0,
-            "log_performance_metrics": False
-        },
-    ):
-        print(str(event), end="")
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"Suggest an eye-catching title for a news article about an art show featuring an artwork described as: {description}."
+                }
+            ],
+            temperature=0.7
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        logger.error(f"Error generating title: {str(e)}")
+        return {"error": str(e)}
+
+def main():
+    try:
+        if len(sys.argv) != 3:
+            print(json.dumps({"error": "Usage: python generate_title.py <description> <openai_api_key>"}))
+            sys.exit(1)
+
+        description = sys.argv[1]
+        openai_api_key = sys.argv[2]
+
+        # Set OpenAI API key
+        openai.api_key = openai_api_key
+
+        result = generate_title(description)
+        
+        if isinstance(result, dict) and "error" in result:
+            print(json.dumps(result))
+        else:
+            print(json.dumps({"title": result}))
+
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
+        sys.exit(1)
 
 if __name__ == "__main__":
-    description = sys.argv[1]
-    
-    replicate_api_key = sys.argv[2]
-
-    # Set API key
-    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
-
-   
-    generate_title(description)
-    
+    main()
