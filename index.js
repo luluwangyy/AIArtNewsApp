@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
 
   socket.on('submit label', (data) => {
   
-    const command = `python3 generate_label.py "${data}" "${replicateApiKey}"`;
+    const command = `python3 generate_label.py "${data}" "${openaiApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
