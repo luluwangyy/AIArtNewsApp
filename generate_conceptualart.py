@@ -57,18 +57,20 @@ def generate_image_re(prompt):
     try:
         description_art = f"A realistic photo that captures an installation in an exhibition. No words in the picture. The artwork: {prompt}."
         output = replicate.run(
-            "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
+            "stability-ai/sdxl:39ed52f2a78e6934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
             input={"prompt": description_art}
         )
         
-        # Convert the output list to URLs
         if isinstance(output, list) and len(output) > 0:
-            # Get the first URL string from the output
-            url = str(output[0])  # Convert to string explicitly
+            url = str(output[0])
+            # Extract title from the prompt (first line if it contains "Title:")
+            title_line = next((line for line in prompt.split('\n') if line.startswith('Title:')), None)
+            title = title_line.replace('Title:', '').strip() if title_line else "Conceptual Art"
+            
             result = {
                 "url": url,
                 "description": prompt,
-                "title": f"Conceptual Art inspired by the artwork"
+                "title": title
             }
             print(json.dumps(result))
         else:
@@ -76,7 +78,6 @@ def generate_image_re(prompt):
             
     except Exception as e:
         print(json.dumps({"error": f"Error generating image: {str(e)}"}))
-
 def main():
     if len(sys.argv) != 5:
         print(json.dumps({"error": "Usage: python generate_conceptualart.py <theme> <imagery> <replicate_api_key> <openai_api_key>"}))
