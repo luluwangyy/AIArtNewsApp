@@ -69,8 +69,8 @@ def generate_image_re(prompt):
             
             result = {
                 "url": url,
-                "description": prompt,
-                "title": title
+                "Description": prompt,
+                "Title": title
             }
             print(json.dumps(result))
         else:

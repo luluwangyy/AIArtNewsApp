@@ -136,29 +136,30 @@ io.on('connection', (socket) => {
         return;
       }
       try {
-        // Parse the JSON output from Python
-        const result = JSON.parse(stdout);
-        
-        if (result.error) {
-            io.emit('error', result.error);
-            return;
-        }
-        
-        // Extract the data
-        const { url, description, title } = result;
-        
-        // Emit the data
+        const outputParts = stdout.split('\n');
+        const url = outputParts[0];
+        const titleLine = outputParts.find(line => line.startsWith('Title:'));
+        const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
         io.emit("new label and article title", title);
+        
+        const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
+        let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
+        
+        // Use a regular expression to remove text between [ and ]
+        description = description.replace(/\[.*?\]/g, '').trim();
+        
+        console.log("Description:", description);
         io.emit('new description', description);
         
-        if (url) {
-            imageUrls.push(url);
-            io.emit('new image', url);
+
+        const matches = url.match(/https:\/\/[^"]+/);
+        if (matches && matches[0]) {
+          imageUrls.push(matches[0]);
+          io.emit('new image', matches[0]);
         } else {
-            io.emit('error', 'No image URL found');
+          io.emit('error', 'No image URL found');
+          console.error('No URL found in Python script output:', stdout);
         }
-        
-   
       } catch (err) {
         console.error('Error processing output:', err);
         io.emit('error', 'Error processing image data');
