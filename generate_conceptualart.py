@@ -68,7 +68,7 @@ def generate_image_re(prompt):
             result = {
                 "url": url,
                 "description": prompt,
-                "title": f"Conceptual Art inspired by the artwork"
+                "title": prompt
             }
             print(json.dumps(result))
         else:
