@@ -5,157 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Key Input</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
         #message {
             display: none;
             margin-top: 10px;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #f8f8f8;
+            white-space: pre-line; /* Allows line breaks */
         }
         .api-links {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-        }
-        .success {
-            color: #4CAF50;
-        }
-        .error {
-            color: #f44336;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to AI Art News App</h1>
+    <h1>Enter Your API Keys</h1>
+    <form id="api-key-form">
+        <label for="replicateApiKey">Replicate API Key:</label>
+        <input type="text" id="replicateApiKey" name="replicateApiKey" required>
+        <br><br>
+        <label for="openaiApiKey">OpenAI API Key:</label>
+        <input type="text" id="openaiApiKey" name="openaiApiKey" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <button id="next-button" style="display:none;">Next</button>
     
-    <div class="form-group">
-        <form id="api-key-form">
-            <div class="form-group">
-                <label for="replicateApiKey">Replicate API Key:</label>
-                <input type="password" id="replicateApiKey" name="replicateApiKey">
-            </div>
-            <div class="form-group">
-                <label for="openaiApiKey">OpenAI API Key:</label>
-                <input type="password" id="openaiApiKey" name="openaiApiKey">
-            </div>
-            <button type="submit">Submit Own Keys</button>
-        </form>
+    <div>
+        <button id="referCodeOptional">Refer Code (Optional)</button>
+        <input type="text" id="referCodeInput" placeholder="Enter Refer Code" style="display:none;">
+        <button id="referCodeSubmit" style="display:none;">Refer Code Submit</button>
     </div>
-
-    <div class="form-group">
-        <h3>OR</h3>
-        <button id="referCodeOptional">Use Referral Code</button>
-        <div id="referralSection" style="display:none;">
-            <div class="form-group">
-                <input type="text" id="referCodeInput" placeholder="Enter Referral Code">
-            </div>
-            <button id="referCodeSubmit">Submit Code</button>
-        </div>
-    </div>
-
     <div id="message"></div>
-    <button id="next-button" style="display:none;">Continue to App</button>
-
+    
     <div class="api-links">
-        <h3>Get Your Own API Keys:</h3>
-        <p>1. Replicate API token: <a href="https://replicate.com/account/api-tokens" target="_blank">https://replicate.com/account/api-tokens</a></p>
-        <p>2. OpenAI API token: <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a></p>
+        <p>Here to get your Replicate API token: <a href="https://replicate.com/account/api-tokens" target="_blank">https://replicate.com/account/api-tokens</a></p>
+        <p>Here to get your OpenAI API token: <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a></p>
     </div>
-
+    
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let keysSet = false;
-
-        // API key parts (split into parts for security)
-        const replicateKeyParts = {
-            part1: 'r8_5mGms',
-            part2: 'r1EeL1jo',
-            part3: 'WvLCnBOp',
-            part4: 'pkUORkxL',
-            part5: 'jQ16tn1R'
-        };
-
-        const openaiKeyParts = {
-            part1: 'sk-proj-Yw2l',
-            part2: 'lRFUzbH6eERd',
-            part3: 'TB2JWnC_VkKb',
-            part4: '0UaSgnAXFecya',
-            part5: 'HPx6oC88jfB_',
-            part6: 'JUALy4QwdSjG-',
-            part7: 'GsacksurT3Blb',
-            part8: 'kFJt8rX3VH7_x',
-            part9: 'otKefk3BH4puV',
-            part10: 'Js266M-WGAbB-',
-            part11: 'm3XPuF3T2BiXI',
-            part12: 'L2LFFY5zJDmr4',
-            part13: 'i-XXCi5Z5LEA'
-        };
-
-        function constructApiKeys(code) {
-            // Different combinations based on referral code
-            const validCombinations = {
-                '12345': {
-                    replicate: Object.values(replicateKeyParts).join(''),
-                    openai: Object.values(openaiKeyParts).join('')
-                },
-                'lulu': {
-                    replicate: Object.values(replicateKeyParts).join(''),
-                    openai: Object.values(openaiKeyParts).join('')
-                }
-                // Add more combinations as needed
-            };
-
-            return validCombinations[code] || null;
-        }
-
-        function showMessage(text, isError = false) {
-            const message = document.getElementById('message');
-            message.textContent = text;
-            message.style.display = 'block';
-            message.className = isError ? 'error' : 'success';
-        }
-
-        function setKeysAndProceed(replicateKey, openaiKey) {
-            socket.emit('submit api keys', {
-                replicateApiKey: replicateKey,
-                openaiApiKey: openaiKey
-            });
-            keysSet = true;
-            document.getElementById('next-button').style.display = 'block';
-            showMessage('API keys set successfully! Click Continue to proceed.');
-        }
 
         document.getElementById('api-key-form').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -187,15 +74,24 @@
         });
 
         document.getElementById('next-button').addEventListener('click', function() {
-            if (keysSet) {
-                window.location.href = 'index_conceptual_chat.html';
-            } else {
-                showMessage('Please set API keys first', true);
-            }
+            window.location.href = 'index_conceptual_chat.html';
         });
 
-        socket.on('error', function(error) {
-            showMessage(error, true);
+        document.getElementById('referCodeOptional').addEventListener('click', function() {
+            document.getElementById('referCodeInput').style.display = 'inline';
+            document.getElementById('referCodeSubmit').style.display = 'inline';
+        });
+
+        document.getElementById('referCodeSubmit').addEventListener('click', function() {
+            var referCode = document.getElementById('referCodeInput').value;
+            var message = document.getElementById('message');
+            
+            if (referCode.toLowerCase() === 'luluisthebest' || referCode.toLowerCase() === 'lulu is the best') {
+                message.textContent = 'REPLICATE_API_TOKEN = r8_NRlczqwGWGvQzQrQqOTbPSg9NXGlGL43ar\nREPLICATE_API_TOKEN = sk-proj-rxlT2tlbv7xAGRCcko90T3BlbkFJG0GZqpxY9zIiQJBHt';
+                message.style.display = 'block';
+            } else {
+                message.style.display = 'your code is invalid';
+            }
         });
     </script>
 </body>

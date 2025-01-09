@@ -1,12 +1,12 @@
+#generate the title
+# This generates the first image
+
 import os
 import sys
 import json
+import replicate
 import openai
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from dotenv import load_dotenv
 
 def generate_title(description):
     try:
@@ -16,38 +16,40 @@ def generate_title(description):
                 {"role": "system", "content": "You are a helpful assistant."},
                 {
                     "role": "user",
-                    "content": f"Suggest an eye-catching title for a news article about an art show featuring an artwork described as: {description}."
+                    "content": f"Only write one eye-catching title of a news article about a new art show around an artwork that has this description {description} "
                 }
             ],
-            temperature=0.7
+            temperature=0.5
         )
-        return response.choices[0].message.content.strip()
+        response_text = response['choices'][0]['message']['content'].strip()
+        return response_text
     except Exception as e:
-        logger.error(f"Error generating title: {str(e)}")
-        return {"error": str(e)}
+        print(f"An error occurred: {e}")
+        return []
 
-def main():
-    try:
-        if len(sys.argv) != 3:
-            print(json.dumps({"error": "Usage: python generate_title.py <description> <openai_api_key>"}))
-            sys.exit(1)
 
-        description = sys.argv[1]
-        openai_api_key = sys.argv[2]
 
-        # Set OpenAI API key
-        openai.api_key = openai_api_key
-
-        result = generate_title(description)
-        
-        if isinstance(result, dict) and "error" in result:
-            print(json.dumps(result))
-        else:
-            print(json.dumps({"title": result}))
-
-    except Exception as e:
-        print(json.dumps({"error": str(e)}))
-        sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 5:
+        print("Usage: python generate_title.py <description> <openai_api_key>")
+        sys.exit(1)
+
+    description = sys.argv[1]
+    openai_api_key = sys.argv[2]
+
+
+    # Set API keys
+    openai.api_key = openai_api_key
+
+    
+    final_title = generate_title(description)
+    
+   
+    print(final_title)
+
+
+
+
+
+
