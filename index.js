@@ -86,7 +86,7 @@ io.on('connection', (socket) => {
     console.log('bio Keys received')
   
     const { name, bio } = data;
-    const command = `python3 generate_bio.py "${name}" "${bio}" "${replicateApiKey}"`;
+    const command = `python3 generate_bio.py "${name}" "${bio}" "${openaiApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
