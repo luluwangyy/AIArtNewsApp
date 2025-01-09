@@ -139,6 +139,18 @@ io.on('connection', (socket) => {
     });
   });
 
+
+  function extractTitle(text) {
+    const titleStart = text.indexOf("Title:") + "Title:".length;
+    const titleEnd = text.indexOf("Description:");
+    
+    if (titleStart === -1 || titleEnd === -1) {
+        return null;
+    }
+    
+    return text.slice(titleStart, titleEnd).trim();
+}
+
   socket.on('submit concept', (prompt) => {
     prompts.push(prompt);
     io.emit('submit concept', prompt);
@@ -158,11 +170,12 @@ io.on('connection', (socket) => {
         const response = JSON.parse(stdout.trim());
         const description = response.description;
         //const title = response.title.replace(/^"|"$/g, ''); // Remove surrounding quotes
-        const title = description.match(/Title:([\s\S]*?)(?=\n\n|$)/);
+        
         const descriptionMatch = description.match(/Description:([\s\S]*?)(?=\n\n|$)/);
+        const title = extractTitle(description);
         io.emit('new description', descriptionMatch);
         //io.emit('new title', title); // Emit the cleaned title
-        console.log("Description:", descriptionMatch);
+        //console.log("Description:", descriptionMatch);
         console.log("Title:", title);
 
         const url = response.url;
