@@ -147,8 +147,10 @@ io.on('connection', (socket) => {
     if (titleStart === -1 || titleEnd === -1) {
         return null;
     }
-    
-    return text.slice(titleStart, titleEnd).trim();
+    const re = text.slice(titleStart, titleEnd).trim();
+
+    const result = re.match(/"([^"]*)"/)?.[1];
+    return result;
 }
 
   socket.on('submit concept', (prompt) => {
