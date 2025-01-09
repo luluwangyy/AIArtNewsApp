@@ -1,40 +1,55 @@
 #generate the title
+# This generates the first image
 
-
-import replicate
 import os
 import sys
 import json
-
-# Set your API token
-
-
+import replicate
+import openai
+from dotenv import load_dotenv
 
 def generate_title(description):
-    for event in replicate.stream(
-        "mistralai/mixtral-8x7b-instruct-v0.1",
-        input={
-            "top_k": 50,
-            "top_p": 0.9,
-            "prompt": f"Only write one eye-catching title of a news article about a new art show around an artwork that has this description {description} ",
-            "temperature": 0.6,
-            "system_prompt": "You are a very helpful, respectful and honest assistant.",
-            "length_penalty": 1,
-            "max_new_tokens": 1024,
-            "prompt_template": "<s>[INST] {prompt} [/INST] ",
-            "presence_penalty": 0
-        },
-    ):
-        print(str(event), end="")
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"Only write one eye-catching title of a news article about a new art show around an artwork that has this description {description} "
+                }
+            ],
+            temperature=0.5
+        )
+        response_text = response['choices'][0]['message']['content'].strip()
+        return response_text
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
+
+
+
 
 if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Usage: python generate_title.py <description> <openai_api_key>")
+        sys.exit(1)
+
     description = sys.argv[1]
+    openai_api_key = sys.argv[2]
+
+
+    # Set API keys
+    openai.api_key = openai_api_key
+
     
-    replicate_api_key = sys.argv[2]
-
-    # Set API key
-    os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
-
+    final_title = generate_title(description)
+    
    
-    generate_title(description)
-    
+    print(final_title)
+
+
+
+
+
+
