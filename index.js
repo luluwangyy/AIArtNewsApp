@@ -154,6 +154,9 @@ io.on('connection', (socket) => {
         
         io.emit('new description', description);
         console.log("Description:", description);
+        const url = response.url;
+        imageUrls.push(url);
+        io.emit('new image', url);
 
         const title = response.title;
 
@@ -169,21 +172,29 @@ io.on('connection', (socket) => {
         io.emit("new label and article title", title);
         
         console.log("Description:", description);
+        console.log("url:", url);
+        console.log("tile:", title);
+
+
         io.emit('new description', description);
         
+       
+        //const matches = url.match(/https:\/\/[^"]+/);
+         //if (matches && matches[0]) {
+          // imageUrls.push(matches[0]);
+          // io.emit('new image', matches[0]);
+        // } else {
+          // io.emit('error', 'No image URL found');
+         //  console.error('No URL found in Python script output:', stdout);
+        // }
 
-        const matches = url.match(/https:\/\/[^"]+/);
-        if (matches && matches[0]) {
-          imageUrls.push(matches[0]);
-          io.emit('new image', matches[0]);
-        } else {
-          io.emit('error', 'No image URL found');
-          console.error('No URL found in Python script output:', stdout);
-        }
+        
       } catch (err) {
         console.error('Error processing output:', err);
         io.emit('error', 'Error processing image data');
       }
+
+
     });
 
     exec(command_idea2, (error, stdout, stderr) => {
