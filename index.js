@@ -149,17 +149,24 @@ io.on('connection', (socket) => {
       try {
          //const titleLine = outputParts.find(line => line.startsWith('Title:'));
         //const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
+        const response = JSON.parse(stdout.trim());
+        const description = response.description;
         
-        const outputParts = stdout.split('\n');
-        const url = outputParts[0];
+        io.emit('new description', description);
+        console.log("Description:", description);
+
+        const title = response.title;
+
+       ////const outputParts = stdout.split('\n');
+       ///// const url = outputParts[0];
        
         
-        const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
-        let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
+        ////const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
+      ////  let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
         
         // Use a regular expression to remove text between [ and ]
         //description = description.replace(/\[.*?\]/g, '').trim();
-        io.emit("new label and article title", description);
+        io.emit("new label and article title", title);
         
         console.log("Description:", description);
         io.emit('new description', description);
@@ -186,29 +193,45 @@ io.on('connection', (socket) => {
         return;
       }
       try {
-        const outputParts2 = stdout.split('\n');
-        const url2 = outputParts2[0];
+        //const titleLine = outputParts.find(line => line.startsWith('Title:'));
+       //const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
+       const response2 = JSON.parse(stdout.trim());
+       const description2 = response2.description;
+       
+       io.emit('new description 2', description2);
+       console.log("Description 2:", description2);
 
-        const titleLine2 = outputParts2.find(line => line.startsWith('Title:'));
-        const title2 = titleLine2 ? titleLine2.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
+       const title2 = response2.title;
 
-        const descriptionStartIndex2 = outputParts2.findIndex(line => line.startsWith('Description:')) + 1;
-        const description2 = outputParts2.slice(descriptionStartIndex2).join('\n').trim();
+      ////const outputParts = stdout.split('\n');
+      ///// const url = outputParts[0];
+      
+       
+       ////const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
+     ////  let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
+       
+       // Use a regular expression to remove text between [ and ]
+       //description = description.replace(/\[.*?\]/g, '').trim();
+       io.emit("new label and article title", title2);
+       
+       console.log("Description:", description2);
+       io.emit('new description', description2);
+       
 
-        console.log("Title2:", title2);
+       const matches = url.match(/https:\/\/[^"]+/);
+       if (matches && matches[0]) {
+         imageUrls.push(matches[0]);
+         io.emit('new image', matches[0]);
+       } else {
+         io.emit('error', 'No image URL 2found');
+         console.error('No URL 2found in Python script output:', stdout);
+       }
+     } catch (err) {
+       console.error('Error processing 2 output:', err);
+       io.emit('error', 'Error processing 2 image data');
+     }
+   });
 
-        const matches2 = url2.match(/https:\/\/[^"]+/);
-        if (matches2 && matches2[0]) {
-          io.emit('new image 2', matches2[0]);
-        } else {
-          console.error('No URL found in Python script output:', stdout);
-          io.emit('error', 'No image URL found');
-        }
-      } catch (err) {
-        console.error('Error processing output:', err);
-        io.emit('error', 'Error processing image data');
-      }
-    });
   });
 
 });
