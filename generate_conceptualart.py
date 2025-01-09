@@ -67,8 +67,8 @@ def generate_image_re(prompt):
             url = str(output[0])  # Convert to string explicitly
             result = {
                 "url": url,
-                "description": prompt,
-                "title": prompt
+                "description": prompt.replace('\n', ' '),  # Remove newlines
+                "title": prompt.replace('\n', ' ')  # Remove newlines
             }
             print(json.dumps(result))
         else:
