@@ -42,7 +42,7 @@ def main():
         openai.api_key = openai_api_key
 
         generated_bio = generate_bio(name, bio)
-        print(generated_bio)
+       #print(generated_bio)
         
         # Check if the result is an error dictionary
         if isinstance(generated_bio, dict) and "error" in generated_bio:
