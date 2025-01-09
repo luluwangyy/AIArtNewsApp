@@ -70,7 +70,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit title', (data) => {
-    const command = `python3 generate_title.py "${data}" "${replicateApiKey}"`;
+    const command = `python3 generate_title.py "${data}" "${openaiApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
