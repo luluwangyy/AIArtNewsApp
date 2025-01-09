@@ -209,10 +209,10 @@ io.on('connection', (socket) => {
        const response2 = JSON.parse(stdout.trim());
        const description2 = response2.description;
        
-       io.emit('new description 2', description2);
+       //io.emit('new description 2', description2);
        console.log("Description 2:", description2);
 
-       const title2 = response2.title;
+       //const title2 = response2.title;
 
       ////const outputParts = stdout.split('\n');
       ///// const url = outputParts[0];
@@ -223,20 +223,16 @@ io.on('connection', (socket) => {
        
        // Use a regular expression to remove text between [ and ]
        //description = description.replace(/\[.*?\]/g, '').trim();
-       io.emit("new label and article title", title2);
+      // io.emit("new label and article title", title2);
        
        console.log("Description:", description2);
-       io.emit('new description', description2);
+      // io.emit('new description', description2);
+
+       const url2 = response2.url;
+        imageUrls.push(url2);
+        io.emit('new imag2', url2);
        
 
-       const matches = url.match(/https:\/\/[^"]+/);
-       if (matches && matches[0]) {
-         imageUrls.push(matches[0]);
-         io.emit('new image', matches[0]);
-       } else {
-         io.emit('error', 'No image URL 2found');
-         console.error('No URL 2found in Python script output:', stdout);
-       }
      } catch (err) {
        console.error('Error processing 2 output:', err);
        io.emit('error', 'Error processing 2 image data');
