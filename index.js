@@ -180,11 +180,11 @@ io.on('connection', (socket) => {
         
         const descriptionMatch = description.match(/Description:([\s\S]*?)(?=\n\n|$)/);
 
-        const descriptionMatchyy = descriptionMatch.match(/Description:([\s\S]*?)(?=\n\n|$)/);
+        //const descriptionMatchyy = descriptionMatch.match(/Description:([\s\S]*?)(?=\n\n|$)/);
         const title = extractTitle(description);
 
 
-        io.emit('new description', descriptionMatchyy);
+        io.emit('new description', descriptionMatch);
         //io.emit('new title', title); // Emit the cleaned title
         //console.log("Description:", descriptionMatch);
         console.log("Title:", title);
