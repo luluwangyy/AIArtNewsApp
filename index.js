@@ -157,11 +157,12 @@ io.on('connection', (socket) => {
       try {
         const response = JSON.parse(stdout.trim());
         const description = response.description;
-        const title = response.title.replace(/^"|"$/g, ''); // Remove surrounding quotes
-
-        io.emit('new description', description);
+        //const title = response.title.replace(/^"|"$/g, ''); // Remove surrounding quotes
+        const title = description.match(/Title:([\s\S]*?)(?=\n\n|$)/);
+        const descriptionMatch = description.match(/Description:([\s\S]*?)(?=\n\n|$)/);
+        io.emit('new description', descriptionMatch);
         //io.emit('new title', title); // Emit the cleaned title
-        console.log("Description:", description);
+        console.log("Description:", descriptionMatch);
         console.log("Title:", title);
 
         const url = response.url;
