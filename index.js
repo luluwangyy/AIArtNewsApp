@@ -134,8 +134,13 @@ io.on('connection', (socket) => {
         io.emit('error', 'Failed to generate label');
         return;
       }
-      io.emit('new label', stdout.trim());
-      console.log("Label:", stdout.trim());
+
+      
+      const text5 = stdout.trim();
+      const regex5 = /\*{"label": "([^"]*)"}*/;
+      const result5 = text5.match(regex5)?.[1];
+      io.emit('new label', result5);
+      console.log("Label:", result5);
     });
   });
 
@@ -174,8 +179,12 @@ io.on('connection', (socket) => {
         //const title = response.title.replace(/^"|"$/g, ''); // Remove surrounding quotes
         
         const descriptionMatch = description.match(/Description:([\s\S]*?)(?=\n\n|$)/);
+
+        const descriptionMatchyy = descriptionMatch.match(/Description:([\s\S]*?)(?=\n\n|$)/);
         const title = extractTitle(description);
-        io.emit('new description', descriptionMatch);
+
+
+        io.emit('new description', descriptionMatchyy);
         //io.emit('new title', title); // Emit the cleaned title
         //console.log("Description:", descriptionMatch);
         console.log("Title:", title);
