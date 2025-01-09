@@ -136,17 +136,19 @@ io.on('connection', (socket) => {
         return;
       }
       try {
+         //const titleLine = outputParts.find(line => line.startsWith('Title:'));
+        //const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
+        
         const outputParts = stdout.split('\n');
         const url = outputParts[0];
-        const titleLine = outputParts.find(line => line.startsWith('Title:'));
-        const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
-        io.emit("new label and article title", title);
+       
         
         const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
         let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
         
         // Use a regular expression to remove text between [ and ]
-        description = description.replace(/\[.*?\]/g, '').trim();
+        //description = description.replace(/\[.*?\]/g, '').trim();
+        io.emit("new label and article title", description);
         
         console.log("Description:", description);
         io.emit('new description', description);
