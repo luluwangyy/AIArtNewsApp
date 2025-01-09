@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 def generate_bio(name, bio):
     try:
+        print('starting generating bio haha')
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -27,6 +28,7 @@ def generate_bio(name, bio):
         return {"error": str(e)}
 
 def main():
+    print ('start generating bio1')
     try:
         if len(sys.argv) != 4:
             print(json.dumps({"error": "Usage: python generate_bio.py <name> <bio> <openai_api_key>"}))
@@ -40,6 +42,7 @@ def main():
         openai.api_key = openai_api_key
 
         generated_bio = generate_bio(name, bio)
+        print(generated_bio)
         
         # Check if the result is an error dictionary
         if isinstance(generated_bio, dict) and "error" in generated_bio:

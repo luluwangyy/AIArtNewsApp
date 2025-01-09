@@ -38,43 +38,6 @@
         }
 
 
-    #help-button {
-        position: fixed;
-        top: 20px;
-        right: 35%;
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        z-index: 9999;
-    }
-
-    #help-modal {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        z-index: 10001;
-        max-width: 400px;
-        text-align: center;
-    }
-
-    #help-modal-close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        cursor: pointer;
-        font-size: 20px;
-    }
-
-
 
         #topic-display { margin: 30px 20px 0;  width: 60%; font-size: 44px; padding: 10px 0; font-weight: bold; font-family: 'Palatino', Palatino, serif; z-index: 9999; /* Make sure this is on top or adjust as necessary */
     color: black; }
@@ -128,16 +91,6 @@
    <link rel="stylesheet" href="style1.css">
 </head>
 <body>
-    <button id="help-button">How to Use</button>
-    <div id="help-modal">
-        <span id="help-modal-close">&times;</span>
-        <h2>How to Use AIsty</h2>
-        <p>1. Enter a theme and imagery in the first form</p>
-        <p>2. Enter an artist name and identity in the second form</p>
-        <p>3. Click submit on both forms</p>
-        <p>4. Wait about 10 seconds and CLICK "DISCLOSE" button on the bottom!!! Then you can see your AI-generated art news article!</p>
-    </div>
- 
     <div class="navbar" id="navbar" style="display: none;">
         <div class="navbar-container">
             <h1>AIrtsy</h1>
@@ -198,7 +151,7 @@
     <form id="conceptual-form" style="bottom: 200px;">
         <input id="theme-input" autocomplete="off" placeholder="any theme" />
         <input id="imagery-input" autocomplete="off" placeholder="any imagery" />
-        <button type="button" onclick="submitConceptualForm()">Submit</button>
+        <button type="button" id="conceptual-submit">Submit</button>
     </form>
 
     <form id="bio-form" style="bottom: 150px;">
@@ -211,177 +164,195 @@
     
     <script src="/socket.io/socket.io.js"></script>
     <script>
-            document.getElementById('help-button').addEventListener('click', () => {
-        document.getElementById('help-modal').style.display = 'block';
+    const socket = io({
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000
     });
-
-    document.getElementById('help-modal-close').addEventListener('click', () => {
-        document.getElementById('help-modal').style.display = 'none';
+    
+    // Get DOM elements
+    const messages = document.getElementById('messages');
+    const imageForm = document.getElementById('image-form');
+    const imageInput = document.getElementById('image-input');
+    const imageDisplay = document.getElementById('image-display');
+    const anotherDisplay = document.getElementById('another-display');
+    const descriptionDisplay = document.getElementById('description-display');
+    const topicDisplay = document.getElementById('topic-display');
+    const nameDisplay = document.getElementById('name-display');
+    const bioDisplay = document.getElementById('bio-display');
+    const bioTitleDisplay = document.getElementById('bio-title-display');
+    const aboutDisplay = document.getElementById('about-display');
+    const similarDisplay = document.getElementById('similar-display');
+    const labelDisplay = document.getElementById('label-display');
+    
+    // Get form elements
+    const conceptualForm = document.getElementById('conceptual-form');
+    const themeInput = document.getElementById('theme-input');
+    const imageryInput = document.getElementById('imagery-input');
+    const conceptualSubmit = document.getElementById('conceptual-submit');
+    
+    // Initialize debug logging
+    console.log('Script initialized');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM fully loaded');
+        if (conceptualSubmit) {
+            console.log('Conceptual submit button found');
+        } else {
+            console.error('Conceptual submit button not found');
+        }
     });
-        const socket = io();
-
-        const messages = document.getElementById('messages');
-        const imageForm = document.getElementById('image-form');
-        const imageInput = document.getElementById('image-input');
-        const imageDisplay = document.getElementById('image-display');
-
-        const anotherDisplay = document.getElementById('another-display');
-
-        const descriptionDisplay = document.getElementById('description-display');
-        const imageDisplayMid = document.getElementById('image-display-mid');
-        const mergeButton = document.getElementById('merge-btn');
-
-        const conceptualform = document.getElementById('conceptual-form');
-        const themeInput = document.getElementById('theme-input');
-        const imageryInput = document.getElementById('imagery-input');
-
-        const bioForm = document.getElementById('bio-form');
-        const nameInput = document.getElementById('name-input');
-        const bioInput = document.getElementById('bio-input');
-
-        const topicDisplay = document.getElementById('topic-display');
-        const nameDisplay = document.getElementById('name-display');
-
-        const bioTitleDisplay = document.getElementById('bio-title-display');
-
-        const bioDisplay = document.getElementById('bio-display');
-        const aboutDisplay = document.getElementById('about-display');
-        const similarDisplay = document.getElementById('similar-display');
-        const labelDisplay = document.getElementById('label-display');
-
-
-        function submitConceptualForm() {
-            event.preventDefault();
+    
+    // Form submission handlers
+    function handleConceptualSubmit(event) {
+        event.preventDefault();
+        console.log('Conceptual form submission started');
+    
+        const theme = themeInput.value.trim();
+        const imagery = imageryInput.value.trim();
+        
+        console.log('Theme:', theme);
+        console.log('Imagery:', imagery);
+    
+        if (!theme || !imagery) {
+            console.log('Validation failed: Empty fields');
+            alert('Please fill in both theme and imagery fields');
+            return;
+        }
+    
+        try {
+            console.log('Emitting submit concept event');
+            socket.emit('submit concept', { theme, imagery });
             
-            socket.emit('submit concept', { theme: themeInput.value,imagery: imageryInput.value });
-            const chat_theme = "Theme: " + themeInput.value;
-            const chat_Imagery = "Imagery: " + imageryInput.value;
-            socket.emit('submit chat', chat_theme);
-            socket.emit('submit chat', chat_Imagery);
+            // Add to chat history
+            socket.emit('submit chat', `Theme: ${theme}`);
+            socket.emit('submit chat', `Imagery: ${imagery}`);
+            
+            // Clear inputs
             themeInput.value = '';
             imageryInput.value = '';
-
+            
+            console.log('Conceptual form submission completed');
+        } catch (error) {
+            console.error('Error in conceptual form submission:', error);
+            alert('Error submitting form. Please try again.');
+        }
+    }
+    
+    function submitBioForm() {
+        const name = document.getElementById('name-input').value;
+        const bio = document.getElementById('bio-input').value;
         
-           
+        if (!name || !bio) {
+            alert('Please fill in both name and bio fields');
+            return;
         }
-        function hideImage() {
-         document.getElementById('top-image').style.display = 'none';
-        }
-
-        function submitBioForm() {
-            event.preventDefault();
-            
-            socket.emit('submit bio', { name: nameInput.value,bio: bioInput.value });
-            console.log('Emitting bio:', bioInput.value); 
-            
-            const chat_name = "Name: " + nameInput.value;
-            const chat_bio = "Identity: " + bioInput.value;
-            socket.emit('submit chat', chat_name);
-            socket.emit('submit chat', chat_bio);
-
-
-            socket.emit('submit header', nameInput.value);
-            nameInput.value = '';
-            bioInput.value = '';
-           
-        }
-
-        socket.on('new header',(name) => {
-            nameDisplay.textContent = name;
-            var navbar = document.getElementById('navbar');
-            if (navbar.style.display === "none") {
-                navbar.style.display = "block";
-                this.textContent = "Hide Navbar";
-            } else {
-                navbar.style.display = "none";
-                this.textContent = "Show Navbar";
-            }
-       });
-
-imageForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (imageInput.value) {
-        const prompt = "Chat: " + imageInput.value;
-        console.socket-chat-example('Emitting chat:', prompt); // Check what is being sent
-        socket.emit('submit chat', prompt);
-        imageInput.value = '';
+    
+        socket.emit('submit bio', { name, bio });
+        
+        // Add to chat history
+        socket.emit('submit chat', `Name: ${name}`);
+        socket.emit('submit chat', `Identity: ${bio}`);
+        
+        // Update header
+        socket.emit('submit header', name);
+        
+        // Clear inputs
+        document.getElementById('name-input').value = '';
+        document.getElementById('bio-input').value = '';
     }
-});
-
-socket.on('new label and article title', (prompt) => {
-            socket.emit('submit label', prompt);
-            socket.emit('submit title', prompt);
-
-});
-
-     
-        socket.on('new chat', (prompt) => {
-            const promptItem = document.createElement('li');
-            promptItem.textContent =  prompt;
-            messages.appendChild(promptItem);
-            window.scrollTo(0, document.body.scrollHeight);
-        });
-
-
-        socket.on('new title', (title) => {
-    if(title) {
-        document.getElementById('topic-display').textContent = title;
-    } else {
-        console.log("Title data is undefined or null");
+    
+    function hideImage() {
+        document.getElementById('top-image').style.display = 'none';
     }
-});
-
-
-
-        socket.on('new image', (imageURL) => {
+    
+    // Event listeners
+    conceptualSubmit.addEventListener('click', handleConceptualSubmit);
+    conceptualForm.addEventListener('submit', (e) => e.preventDefault());
+    
+    imageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (imageInput.value) {
+            socket.emit('submit chat', `Chat: ${imageInput.value}`);
+            imageInput.value = '';
+        }
+    });
+    
+    // Socket event handlers
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+    
+    socket.on('new header', (name) => {
+        nameDisplay.textContent = name;
+        const navbar = document.getElementById('navbar');
+        navbar.style.display = navbar.style.display === "none" ? "block" : "none";
+    });
+    
+    socket.on('new chat', (prompt) => {
+        const li = document.createElement('li');
+        li.textContent = prompt;
+        messages.appendChild(li);
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+    
+    socket.on('new title', (title) => {
+        if (title) {
+            topicDisplay.textContent = title;
+        }
+    });
+    
+    socket.on('new image', (imageURL) => {
+        if (imageURL) {
             imageDisplay.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>`;
-        });
-
-        socket.on('new image 2', (imageURL) => {
+        }
+    });
+    
+    socket.on('new image 2', (imageURL) => {
+        if (imageURL) {
             anotherDisplay.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>`;
             similarDisplay.textContent = "Similar Works";
-        });
-
-        socket.on('new description', (description) => {
-           // if (data.imageId === 'image1') {
+        }
+    });
+    
+    socket.on('new description', (description) => {
+        if (description) {
             descriptionDisplay.textContent = description;
             aboutDisplay.textContent = "About";
-           // description = description.substring(0, 100);
-           
-            //}
-        });
-
-
-        socket.on('new label', (description) => {
+        }
+    });
+    
+    socket.on('new label', (description) => {
+        if (description) {
             labelDisplay.textContent = description;
-            
-        });
-
-
-        socket.on('new bio', (description) => {
+        }
+    });
+    
+    socket.on('new bio', (description) => {
+        if (description) {
             bioDisplay.textContent = description;
             bioTitleDisplay.textContent = "Artist Bio";
-       });
-
-
-     
-
-
-
-
-
-        socket.on('new image middle', (imageURL) => {
-            imageDisplayMid.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>` + imageDisplayMid.innerHTML;
-        });
-
-        socket.on('error', (errorMsg) => {
-            imageDisplay.textContent = 'Error: ' + errorMsg;
-        });
-
-        socket.on('connect_error', (err) => {
-    console.log(`connect_error due to ${err.message}`);
-});
-
+        }
+    });
+    
+    socket.on('new label and article title', (prompt) => {
+        if (prompt) {
+            socket.emit('submit label', prompt);
+            socket.emit('submit title', prompt);
+        }
+    });
+    
+    socket.on('error', (errorMsg) => {
+        console.error('Error:', errorMsg);
+        alert(`Error: ${errorMsg}`);
+    });
+    
+    socket.on('connect_error', (err) => {
+        console.error('Connection error:', err.message);
+    });
     </script>
 </body>
 </html>
