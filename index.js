@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit bio', (data) => {
-    console.log('bio Keys received')
+    console.log('bio Keys received');
   
     const { name, bio } = data;
     const command = `python3 generate_bio.py "${name}" "${bio}" "${openaiApiKey}"`;
@@ -93,10 +93,21 @@ io.on('connection', (socket) => {
         io.emit('error', 'Failed to generate bio');
         return;
       }
-      io.emit('new bio', stdout.trim());
-      console.log("Bio:", stdout.trim());
+      
+      try {
+        // Parse the JSON response to extract the bio content
+        const bioResponse = JSON.parse(stdout.trim());
+        const bioContent = bioResponse.bio;
+        
+        io.emit('new bio', bioContent);
+        console.log("Bio:", bioContent);
+      } catch (parseError) {
+        console.error('Error parsing bio JSON:', parseError);
+        io.emit('error', 'Error processing bio data');
+      }
     });
   });
+
 
   socket.on('submit header', (data) => {
     io.emit('new header', data);
