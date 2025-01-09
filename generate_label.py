@@ -16,7 +16,7 @@ def generate_label(description):
                 {"role": "system", "content": "You are a helpful assistant."},
                 {
                     "role": "user",
-                    "content": f"Write a concise label for the artwork described as: {description}. Format: Title, Year: 2024, Medium, Dimensions, Collection, Location."
+                    "content": f"Write a concise label for the artwork described as: {description}. Format: Year: 2025, Medium, Dimensions, Collection, Location."
                 }
             ],
             temperature=0.6
@@ -43,7 +43,7 @@ def main():
         if isinstance(result, dict) and "error" in result:
             print(json.dumps(result))
         else:
-            print(json.dumps({"title": result}))
+            print(json.dumps({"label": result}))
 
     except Exception as e:
         print(json.dumps({"error": str(e)}))

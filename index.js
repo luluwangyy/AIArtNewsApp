@@ -160,13 +160,14 @@ io.on('connection', (socket) => {
         const title = response.title.replace(/^"|"$/g, ''); // Remove surrounding quotes
 
         io.emit('new description', description);
-        io.emit('new title', title); // Emit the cleaned title
+        //io.emit('new title', title); // Emit the cleaned title
         console.log("Description:", description);
         console.log("Title:", title);
 
         const url = response.url;
         imageUrls.push(url);
         io.emit('new image', url);
+        io.emit("new label and article title", title);
 
       } catch (err) {
         console.error('Error processing output:', err);
