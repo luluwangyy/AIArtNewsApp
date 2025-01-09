@@ -28,28 +28,30 @@ def generate_title(description):
         return []
 
 
+def main():
+    try:
+        if len(sys.argv) != 3:
+            print(json.dumps({"error": "Usage: python generate_title.py <description> <openai_api_key>"}))
+            sys.exit(1)
 
+        description = sys.argv[1]
+        openai_api_key = sys.argv[2]
 
-if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python generate_title.py <description> <openai_api_key>")
+        # Set OpenAI API key
+        openai.api_key = openai_api_key
+
+        result = generate_title(description)
+        
+        if isinstance(result, dict) and "error" in result:
+            print(json.dumps(result))
+        else:
+            print(json.dumps({"title": result}))
+
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
         sys.exit(1)
 
-    description = sys.argv[1]
-    openai_api_key = sys.argv[2]
-
-
-    # Set API keys
-    openai.api_key = openai_api_key
-
-    
-    final_title = generate_title(description)
-    
-   
-    print(final_title)
-
-
-
-
+if __name__ == "__main__":
+    main()
 
 
