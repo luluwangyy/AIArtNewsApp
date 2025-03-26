@@ -355,26 +355,9 @@
         // Reset description retry count
         descriptionRetryCount = 0;
 
-        // Clear any existing timeout
-        if (descriptionTimeout) {
-            clearTimeout(descriptionTimeout);
-        }
-
         try {
             console.log('Emitting submit concept event');
             socket.emit('submit concept', { theme, imagery });
-            
-            // Set timeout for description
-            descriptionTimeout = setTimeout(() => {
-                if (descriptionRetryCount < MAX_DESCRIPTION_RETRIES) {
-                    console.log(`Description timeout - retrying (attempt ${descriptionRetryCount + 1})`);
-                    retryDescription(theme, imagery);
-                } else {
-                    console.log('Max retries reached for description');
-                    hideLoading(descriptionLoading);
-                    alert('Description generation is taking longer than expected. Please try again.');
-                }
-            }, DESCRIPTION_TIMEOUT);
             
             // Add to chat history
             socket.emit('submit chat', `Theme: ${theme}`);
@@ -392,29 +375,6 @@
         }
     }
 
-    function retryDescription(theme, imagery) {
-        descriptionRetryCount++;
-        console.log(`Retrying description generation - attempt ${descriptionRetryCount}`);
-        
-        // Clear previous timeout
-        if (descriptionTimeout) {
-            clearTimeout(descriptionTimeout);
-        }
-
-        // Emit the concept again
-        socket.emit('submit concept', { theme, imagery });
-
-        // Set new timeout
-        descriptionTimeout = setTimeout(() => {
-            if (descriptionRetryCount < MAX_DESCRIPTION_RETRIES) {
-                retryDescription(theme, imagery);
-            } else {
-                hideLoading(descriptionLoading);
-                alert('Description generation is taking longer than expected. Please try again.');
-            }
-        }, DESCRIPTION_TIMEOUT);
-    }
-    
     function submitBioForm() {
         const name = document.getElementById('name-input').value;
         const bio = document.getElementById('bio-input').value;
@@ -511,24 +471,21 @@
     socket.on('new description', (description) => {
         console.log('Received description:', description);
         
-        if (descriptionTimeout) {
-            clearTimeout(descriptionTimeout);
-        }
-
         if (description) {
             hideLoading(descriptionLoading);
-            descriptionDisplay.textContent = description;
+            // Check if description is an array and get the first match
+            if (Array.isArray(description) && description.length > 1) {
+                descriptionDisplay.textContent = description[1].trim();
+            } else {
+                descriptionDisplay.textContent = description;
+            }
             aboutDisplay.textContent = "About";
-            descriptionRetryCount = 0;
             descriptionGenerated = true;
             checkAllGenerationsComplete();
-        } else if (descriptionRetryCount < MAX_DESCRIPTION_RETRIES) {
-            setTimeout(() => {
-                retryDescription(lastSubmittedTheme, lastSubmittedImagery);
-            }, RETRY_DELAY);
         } else {
             hideLoading(descriptionLoading);
-            console.error('Failed to generate description after max retries');
+            console.error('Failed to generate description');
+            alert('Failed to generate description. Please try again.');
         }
     });
     

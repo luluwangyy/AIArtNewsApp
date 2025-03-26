@@ -62,12 +62,12 @@
     <div class="form-group">
         <form id="api-key-form">
             <div class="form-group">
-                <label for="replicateApiKey">Replicate API Key:</label>
-                <input type="password" id="replicateApiKey" name="replicateApiKey">
+                <label for="user_replicate_key">Replicate API Key:</label>
+                <input type="password" id="user_replicate_key" name="replicateApiKey">
             </div>
             <div class="form-group">
-                <label for="openaiApiKey">OpenAI API Key:</label>
-                <input type="password" id="openaiApiKey" name="openaiApiKey">
+                <label for="user_openai_key">OpenAI API Key:</label>
+                <input type="password" id="user_openai_key" name="openaiApiKey">
             </div>
             <button type="submit">Submit Own Keys</button>
         </form>
@@ -117,8 +117,8 @@
 
         document.getElementById('api-key-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            const replicateApiKey = document.getElementById('replicateApiKey').value;
-            const openaiApiKey = document.getElementById('openaiApiKey').value;
+            const replicateApiKey = document.getElementById('user_replicate_key').value;
+            const openaiApiKey = document.getElementById('user_openai_key').value;
             
             if (!replicateApiKey || !openaiApiKey) {
                 showMessage('Please enter both API keys', true);
