@@ -16,10 +16,10 @@ def generate_title(description):
                 {"role": "system", "content": "You are a helpful assistant."},
                 {
                     "role": "user",
-                    "content": f"Only write one eye-catching title of a news article about a new art show around an artwork that has this description {description} "
+                    "content": f"Create a title for an art news article about an artwork with the following description: {description}. The title should be attractive,  evocative, and no more than 12 words. Do not include quotes around the title in your response."
                 }
             ],
-            temperature=0.5
+            temperature=0.7
         )
         response_text = response['choices'][0]['message']['content'].strip()
         return response_text

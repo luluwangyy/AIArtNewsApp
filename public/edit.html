@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Art Piece - AIrtsy</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Palatino', Palatino, serif;
+            color: #333;
+            background-color: #f8f8f8;
+        }
+        /* Navbar styles */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0 0 0 40px;
+            padding: 0;
+        }
+        .nav-links li {
+            margin-right: 20px;
+        }
+        .nav-actions {
+            display: flex;
+            list-style: none;
+            margin-left: auto;
+            padding: 0;
+        }
+        .nav-actions li {
+            margin-left: 20px;
+        }
+        .nav-links a, .nav-actions a {
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Page header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .page-title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        /* Form styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            align-items: start;
+        }
+        .form-image {
+            width: 100%;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Palatino', Palatino, serif;
+        }
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        
+        /* Button styles */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #007BFF;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Confirmation dialog */
+        .confirmation-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+        .dialog-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+        }
+        .dialog-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .dialog-message {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        .dialog-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-container">
+            <h1>AIrtsy</h1>
+            <ul class="nav-links">
+                 
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="api.html">API</a></li>
+            </ul>
+            <ul class="nav-actions">
+                <li><a href="mode_selection.html">Create New Art</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">Edit Art Piece</h1>
+            <p class="page-subtitle">Update the details of your AI-generated art</p>
+        </div>
+        
+        <div class="form-grid">
+            <div>
+                <img id="art-image" src="" alt="Art Image" class="form-image">
+            </div>
+            <div>
+                <form id="edit-form">
+                    <div class="form-group">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" id="title" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="artist" class="form-label">Artist Name</label>
+                        <input type="text" id="artist" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" class="form-control" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bio" class="form-label">Artist Bio</label>
+                        <textarea id="bio" class="form-control"></textarea>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button type="button" id="discard-btn" class="btn btn-secondary">Discard Changes</button>
+                        <button type="submit" class="btn btn-primary">Submit Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Dialog -->
+    <div id="confirmation-dialog" class="confirmation-dialog">
+        <div class="dialog-content">
+            <h2 class="dialog-title">Discard Changes?</h2>
+            <p class="dialog-message">Are you sure you want to discard your changes? All modifications will be lost.</p>
+            <div class="dialog-buttons">
+                <button id="cancel-discard" class="btn btn-secondary">Cancel</button>
+                <button id="confirm-discard" class="btn btn-primary">Yes, Discard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const artId = urlParams.get('id');
+            
+            if (!artId) {
+                window.location.href = 'gallery.html';
+                return;
+            }
+            
+            const artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+            const art = artCollection.find(item => item.id === artId);
+            
+            if (!art) {
+                alert('Art piece not found');
+                window.location.href = 'gallery.html';
+                return;
+            }
+            
+            // Fill form with existing data
+            document.getElementById('art-image').src = art.imageUrl;
+            document.getElementById('title').value = art.title;
+            document.getElementById('artist').value = art.artist;
+            document.getElementById('description').value = art.description;
+            document.getElementById('bio').value = art.bio || '';
+            
+            // Store original values for discard functionality
+            const originalValues = {
+                title: art.title,
+                artist: art.artist,
+                description: art.description,
+                bio: art.bio || ''
+            };
+            
+            // Handle form submission
+            document.getElementById('edit-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const updatedArt = {
+                    ...art,
+                    title: document.getElementById('title').value.trim(),
+                    artist: document.getElementById('artist').value.trim(),
+                    description: document.getElementById('description').value.trim(),
+                    bio: document.getElementById('bio').value.trim()
+                };
+                
+                // Update art collection
+                const updatedCollection = artCollection.map(item => 
+                    item.id === artId ? updatedArt : item
+                );
+                localStorage.setItem('artCollection', JSON.stringify(updatedCollection));
+                
+                // Redirect to view page with success message
+                window.location.href = `gallery.html?viewItem=${artId}&edited=true`;
+            });
+            
+            // Handle discard changes button
+            document.getElementById('discard-btn').addEventListener('click', function() {
+                // Check if any changes were made
+                const currentTitle = document.getElementById('title').value;
+                const currentArtist = document.getElementById('artist').value;
+                const currentDescription = document.getElementById('description').value;
+                const currentBio = document.getElementById('bio').value;
+                
+                const hasChanges = 
+                    currentTitle !== originalValues.title ||
+                    currentArtist !== originalValues.artist ||
+                    currentDescription !== originalValues.description ||
+                    currentBio !== originalValues.bio;
+                
+                if (hasChanges) {
+                    // Show confirmation dialog
+                    document.getElementById('confirmation-dialog').style.display = 'block';
+                } else {
+                    // No changes, just go back
+                    window.location.href = `gallery.html?viewItem=${artId}`;
+                }
+            });
+            
+            // Handle confirmation dialog buttons
+            document.getElementById('cancel-discard').addEventListener('click', function() {
+                document.getElementById('confirmation-dialog').style.display = 'none';
+            });
+            
+            document.getElementById('confirm-discard').addEventListener('click', function() {
+                window.location.href = `gallery.html?viewItem=${artId}`;
+            });
+            
+            // Close dialog when clicking outside
+            document.getElementById('confirmation-dialog').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Art Creation Mode - AIrtsy</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Palatino', Palatino, serif;
+            background-color: #f8f8f8;
+        }
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0 0 0 40px;
+            padding: 0;
+        }
+        .nav-links li {
+            margin-right: 20px;
+        }
+        .nav-actions {
+            display: flex;
+            list-style: none;
+            margin-left: auto;
+            padding: 0;
+        }
+        .nav-actions li {
+            margin-left: 20px;
+        }
+        .nav-links a, .nav-actions a {
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-actions a:hover {
+            color: #007BFF;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-top: 5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #333;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 3rem;
+            max-width: 600px;
+        }
+        .mode-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+        }
+        .mode-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+            cursor: pointer;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .mode-card.quick-mode {
+            background-color: white;
+        }
+        .mode-card.quick-mode:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background-color: #d5ecd7;
+        }
+        .mode-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background-color: #d5ecd7;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .card-description {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+        .mode-features {
+            margin-bottom: 20px;
+            padding-left: 20px;
+            color: #555;
+        }
+        .mode-features li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-container">
+            <h1>AIrtsy</h1>
+            <ul class="nav-links">
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="api.html">API</a></li>
+            </ul>
+            <ul class="nav-actions">
+                <li><a href="mode_selection.html">Create New Art</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        
+      
+        <h1>Choose Your Creation Mode</h1>
+      
+        <div class="mode-container">
+            <div class="mode-card quick-mode" onclick="selectMode('easy')">
+                <h2 class="card-title">Quick Creation Mode</h2>
+                 
+                <ul class="mode-features">
+                    <li>Simple one-step process</li>
+                    <li>Instant art generation</li>
+                    <li>Basic customization options</li>
+                </ul>
+            </div>
+            
+            <div class="mode-card" onclick="selectMode('complicated')">
+                <h2 class="card-title">Detailed Art Mode</h2>
+                
+                <ul class="mode-features">
+                    <li>Advanced customization options</li>
+                    <li>Professional artistic framework</li>
+                    <li>Detailed creative process</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectMode(mode) {
+            localStorage.setItem('selectedMode', mode);
+            if (mode === 'easy') {
+                window.location.href = 'index_conceptual_chat.html';
+            } else {
+                window.location.href = 'conceptual_art_process.html';
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -87,6 +87,15 @@ def main():
     replicate_api_key = sys.argv[3]
     openai_api_key = sys.argv[4]
 
+    # Validate API keys
+    if not replicate_api_key:
+        print(json.dumps({"error": "Replicate API key cannot be empty"}))
+        sys.exit(1)
+    
+    if not openai_api_key:
+        print(json.dumps({"error": "OpenAI API key cannot be empty"}))
+        sys.exit(1)
+
     # Set API keys
     os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
     openai.api_key = openai_api_key

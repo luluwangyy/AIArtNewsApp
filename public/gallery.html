@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Palatino', Palatino, serif;
+            color: #333;
+            background-color: #f8f8f8;
+        }
+        
+        p {
+            display: block;
+            margin: 0;
+            padding: 0;
+            unicode-bidi: isolate;
+            margin-block-start: 0em;
+            margin-block-end: 0em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        }
+        
+        h2 {
+            display: block;
+            font-size: 1.5em;
+            margin: 0;
+            margin-block-start: 0;
+            margin-block-end: 0;
+            margin-inline-start: 0;
+            margin-inline-end: 0;
+            font-weight: bold;
+            unicode-bidi: isolate;
+        }
+        
+        /* Navbar styles */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0 0 0 40px;
+            padding: 0;
+        }
+        .nav-links li {
+            margin-right: 20px;
+        }
+        .nav-actions {
+            display: flex;
+            list-style: none;
+            margin-left: auto;
+            padding: 0;
+        }
+        .nav-actions li {
+            margin-left: 20px;
+        }
+        .nav-links a, .nav-actions a {
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+            transition: transform 0.3s ease, font-size 0.3s ease;
+            display: inline-block;
+        }
+        
+        .nav-actions a:hover {
+            transform: scale(1.02);
+            font-size: 1rem;
+        }
+        
+        /* Gallery styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 70px;
+            padding-top: 40px;
+            
+        }
+        .h2{
+            margin-block-start: 0.1em;
+            margin-block-end: 0.1em;
+        }
+        .gallery-title {
+            font-size: 2.5rem;
+            margin: 0;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .gallery-subtitle {
+            font-size: 0rem;
+            color: #666;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .gallery-item {
+            background-color: #f8f8f8;
+             
+            overflow: hidden;
+             
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        .gallery-item-content {
+            padding: 11px;
+        }
+        .gallery-item-title {
+            font-size: 1.3rem;
+           
+            color: #333;
+        }
+        .gallery-item-artist {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        .gallery-item-date {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .empty-state h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        .empty-state p {
+            font-size: 1.1rem;
+            color: #777;
+            margin-bottom: 30px;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            background-color: #769ac0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .action-btn:hover {
+            background-color: #3c536b;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+        }
+        .secondary-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Success notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-container">
+            <h1>AIrtsy</h1>
+            <ul class="nav-links">
+              
+                <li><a href="gallery.html">Gallery</a></li>
+                <li><a href="api.html">API</a></li>
+            </ul>
+            <ul class="nav-actions">
+                <li><a href="mode_selection.html">Create New Art</a></li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="gallery-header">
+            <h1 class="gallery-title">Finding the Freshest Art Exhibitions</h1>
+            <p class="gallery-subtitle">Latest News</p>
+        </div>
+        <!-- 
+        <div class="action-buttons">
+            <a href="mode_selection.html" class="action-btn">Add New Art</a>
+        </div>
+         -->
+        <div id="gallery-content">
+            <!-- Gallery content will be loaded dynamically -->
+        </div>
+    </div>
+    
+    <!-- Success Notification -->
+    <div id="notification" class="notification">
+        New item successfully created
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize art collection if not exists
+            if (!localStorage.getItem('artCollection')) {
+                localStorage.setItem('artCollection', JSON.stringify([]));
+            }
+            
+            // Load the gallery
+            loadGallery();
+            
+            // Check if we should show a notification
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('newItem')) {
+                showNotification('New item successfully created');
+                // Remove the query parameter without refreshing the page
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (urlParams.has('deleted')) {
+                showNotification('Art piece deleted successfully');
+                // Remove the query parameter without refreshing the page
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+        
+        function loadGallery() {
+            const galleryContent = document.getElementById('gallery-content');
+            const artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+            
+            if (artCollection.length === 0) {
+                // Show empty state
+                galleryContent.innerHTML = `
+                    <div class="empty-state">
+                        <h2>No Art Pieces Yet</h2>
+                        <p>Create your first AI-generated art piece to add it to your gallery.</p>
+                        <a href="mode_selection.html" class="action-btn">Create Art Now</a>
+                    </div>
+                `;
+            } else {
+                // Create gallery grid with items
+                let galleryHTML = '<div class="gallery-grid">';
+                
+                artCollection.forEach(art => {
+                    const date = new Date(art.date).toLocaleDateString();
+                    galleryHTML += `
+                        <div class="gallery-item" onclick="openArtDetail('${art.id}')">
+                            <img src="${art.imageUrl}" alt="${art.title}" class="gallery-image">
+                            <div class="gallery-item-content">
+                                <h2 class="gallery-item-title">${art.title}</h2>
+                                <p class="gallery-item-artist">by ${art.artist}</p>
+                                <p class="gallery-item-date">${date}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                galleryHTML += '</div>';
+                galleryContent.innerHTML = galleryHTML;
+            }
+        }
+        
+        function openArtDetail(artId) {
+            // Redirect to the view page
+            window.location.href = `view.html?id=${artId}`;
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html> 

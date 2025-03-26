@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Art - AIrtsy</title>
+    <style>
+        body {
+            font-family: 'Palatino', Palatino, serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+
+        .input-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .loading-btn {
+            position: absolute;
+            right: 10px;
+            top: 35px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+
+        .loading-btn.active {
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+
+        #result-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #result-container img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Styles for generated content */
+        #generated-content {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #topic-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        #description-display {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #555;
+            text-align: center;
+        }
+
+        #label-display {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="input-container">
+        <h1>Create Your Art Piece</h1>
+        <form id="art-form">
+            <div class="form-group">
+                <label for="theme">Theme:</label>
+                <textarea id="theme" required placeholder="Enter the theme of your art piece..."></textarea>
+                <button type="button" class="loading-btn" id="theme-loading">Generating...</button>
+            </div>
+            <div class="form-group">
+                <label for="imagery">Imagery:</label>
+                <textarea id="imagery" required placeholder="Describe the imagery you envision..."></textarea>
+                <button type="button" class="loading-btn" id="imagery-loading">Generating...</button>
+            </div>
+            <div class="form-group">
+                <label for="name">Artist Name:</label>
+                <input type="text" id="name" required placeholder="Enter your artist name">
+                <button type="button" class="loading-btn" id="name-loading">Processing...</button>
+            </div>
+            <div class="form-group">
+                <label for="bio">Artist Bio:</label>
+                <textarea id="bio" required placeholder="Write a brief bio about yourself..."></textarea>
+                <button type="button" class="loading-btn" id="bio-loading">Generating...</button>
+            </div>
+            <button type="submit" class="submit-btn" id="submit-btn">Generate Art</button>
+        </form>
+        <button onclick="window.location.href='mode_selection.html'" class="back-btn">Back to Modes</button>
+        
+        <!-- Add hidden display elements for generated content -->
+        <div id="generated-content" style="display: none;">
+            <div id="topic-display"></div>
+            <div id="description-display"></div>
+            <div id="label-display"></div>
+        </div>
+        
+        <div id="result-container"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let isGenerating = false;
+        
+        // Loading button elements
+        const themeLoading = document.getElementById('theme-loading');
+        const imageryLoading = document.getElementById('imagery-loading');
+        const nameLoading = document.getElementById('name-loading');
+        const bioLoading = document.getElementById('bio-loading');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        document.getElementById('art-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const theme = document.getElementById('theme').value.trim();
+            const imagery = document.getElementById('imagery').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+            
+            if (!theme || !imagery || !name || !bio) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (isGenerating) {
+                alert('Please wait while your art is being generated...');
+                return;
+            }
+
+            isGenerating = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Generating Art...';
+
+            try {
+                // Show all loading indicators
+                themeLoading.classList.add('active');
+                imageryLoading.classList.add('active');
+                nameLoading.classList.add('active');
+                bioLoading.classList.add('active');
+
+                // Reset any previous generated content
+                window.generatedTitle = null;
+                window.generatedDescription = null;
+                window.generatedLabel = null;
+                window.generatedBio = null;
+
+                // First emit the bio and name
+                socket.emit('submit bio', { name, bio });
+                socket.emit('submit header', name);
+
+                // Then emit the concept and explicitly request title generation
+                socket.emit('submit concept', { theme, imagery });
+                socket.emit('submit label and article title', `${theme} ${imagery}`);
+
+                // Add to chat history
+                socket.emit('submit chat', `Theme: ${theme}`);
+                socket.emit('submit chat', `Imagery: ${imagery}`);
+                socket.emit('submit chat', `Name: ${name}`);
+                socket.emit('submit chat', `Bio: ${bio}`);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while generating your art. Please try again.');
+                resetUI();
+            }
+        });
+
+        function resetUI() {
+            isGenerating = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Generate Art';
+            themeLoading.classList.remove('active');
+            imageryLoading.classList.remove('active');
+            nameLoading.classList.remove('active');
+            bioLoading.classList.remove('active');
+        }
+
+        // Handle socket events with timeouts and retries
+        let titleRetryCount = 0;
+        const MAX_RETRIES = 3;
+        const RETRY_DELAY = 2000; // 2 seconds
+
+        socket.on('new chat', (prompt) => {
+            console.log('Received chat:', prompt);
+        });
+
+        socket.on('new header', (name) => {
+            console.log('Received header:', name);
+        });
+
+        socket.on('new bio', (bio) => {
+            console.log('Received bio:', bio);
+            window.generatedBio = bio;
+        });
+
+        socket.on('new description', (description) => {
+            console.log('Received description:', description);
+            if (description) {
+                window.generatedDescription = description;
+                document.getElementById('description-display').textContent = description;
+                document.getElementById('generated-content').style.display = 'block';
+            }
+        });
+
+        socket.on('new label', (label) => {
+            console.log('Received label:', label);
+            if (label) {
+                window.generatedLabel = label;
+                document.getElementById('label-display').textContent = label;
+                document.getElementById('generated-content').style.display = 'block';
+            }
+        });
+
+        socket.on('new title', (title) => {
+            console.log('Received title:', title);
+            titleRetryCount = 0; // Reset retry count on successful receipt
+            
+            if (title) {
+                window.generatedTitle = title;
+                document.getElementById('topic-display').textContent = title;
+                document.getElementById('generated-content').style.display = 'block';
+            } else if (titleRetryCount < MAX_RETRIES) {
+                // If no title received, retry after delay
+                titleRetryCount++;
+                setTimeout(() => {
+                    console.log(`Retrying title generation (attempt ${titleRetryCount})`);
+                    socket.emit('submit label and article title', 
+                        `${document.getElementById('theme').value} ${document.getElementById('imagery').value}`);
+                }, RETRY_DELAY);
+            }
+        });
+
+        socket.on('new image', (imageURL) => {
+            if (imageURL) {
+                window.firstImageUrl = imageURL; // Store first image URL
+                const resultContainer = document.getElementById('result-container');
+                resultContainer.innerHTML = `
+                    <h3>Your Art Has Been Generated!</h3>
+                    <img src="${imageURL}" alt="Generated Art">
+                `;
+            }
+        });
+
+        socket.on('new image 2', (imageURL) => {
+            if (imageURL) {
+                window.secondImageUrl = imageURL; // Store second image URL
+                const resultContainer = document.getElementById('result-container');
+                // Add second image below the first one
+                const secondImageDiv = document.createElement('div');
+                secondImageDiv.style.marginTop = '20px';
+                secondImageDiv.innerHTML = `<img src="${imageURL}" alt="Generated Art 2">`;
+                resultContainer.appendChild(secondImageDiv);
+
+                // Create and save two separate art pieces
+                const theme = document.getElementById('theme').value.trim();
+                const imagery = document.getElementById('imagery').value.trim();
+                const name = document.getElementById('name').value.trim();
+                const bio = document.getElementById('bio').value.trim();
+                
+                // Wait a short time for any final generated content to arrive
+                setTimeout(() => {
+                    // Create first art piece
+                    const artId1 = 'art_' + Date.now();
+                    const artPiece1 = {
+                        id: artId1,
+                        imageUrl: window.firstImageUrl,
+                        artist: name,
+                        title: window.generatedTitle || theme,
+                        description: window.generatedDescription || imagery,
+                        label: window.generatedLabel || '',
+                        bio: window.generatedBio || bio,
+                        creationMode: 'easy',
+                        originalInput: {
+                            theme: theme,
+                            imagery: imagery,
+                            name: name,
+                            bio: bio
+                        },
+                        date: new Date().toISOString()
+                    };
+
+                    // Create second art piece with slightly modified title
+                    const artId2 = 'art_' + (Date.now() + 1);
+                    const artPiece2 = {
+                        id: artId2,
+                        imageUrl: window.secondImageUrl,
+                        artist: name,
+                        title: (window.generatedTitle || theme) + ' (Variation)',
+                        description: window.generatedDescription || imagery,
+                        label: window.generatedLabel || '',
+                        bio: window.generatedBio || bio,
+                        creationMode: 'easy',
+                        originalInput: {
+                            theme: theme,
+                            imagery: imagery,
+                            name: name,
+                            bio: bio
+                        },
+                        date: new Date().toISOString()
+                    };
+                    
+                    // Save both to localStorage
+                    let artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+                    artCollection.push(artPiece1);
+                    artCollection.push(artPiece2);
+                    localStorage.setItem('artCollection', JSON.stringify(artCollection));
+                    
+                    // Reset UI
+                    resetUI();
+                    
+                    // Redirect to the first art piece after a short delay
+                    setTimeout(() => {
+                        window.location.href = `view.html?id=${artId1}&new=true`;
+                    }, 2000);
+                }, 1000);
+            }
+        });
+
+        socket.on('error', (error) => {
+            alert('Error: ' + error);
+            resetUI();
+        });
+
+        // Reset UI when socket disconnects
+        socket.on('disconnect', () => {
+            resetUI();
+            alert('Connection lost. Please refresh the page.');
+        });
+    </script>
+</body>
+</html> 

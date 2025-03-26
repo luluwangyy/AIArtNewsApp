@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art News - Result</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Palatino', Palatino, serif;
+            color: #333;
+        }
+        /* Navbar styles */
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+        }
+        .navbar h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0 0 0 40px;
+            padding: 0;
+        }
+        .nav-links li {
+            margin-right: 20px;
+        }
+        .nav-actions {
+            display: flex;
+            list-style: none;
+            margin-left: auto;
+            padding: 0;
+        }
+        .nav-actions li {
+            margin-left: 20px;
+        }
+        .nav-links a, .nav-actions a {
+            text-decoration: none;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        .event-info {
+            background-color: #f8f8f8;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        
+        /* Content styles */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .article-header {
+            margin-bottom: 30px;
+        }
+        .article-title {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        .article-artist {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .image-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        .image-container img {
+            width: 100%;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .description-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            margin: 30px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .label-text {
+            font-style: italic;
+            color: #777;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .description-text {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .bio-container {
+            margin-top: 20px;
+        }
+        .bio-text {
+            line-height: 1.6;
+        }
+        
+        /* Additional artworks section */
+        .additional-works {
+            margin-top: 40px;
+        }
+        .similar-works-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        .another-image {
+            max-width: 70%;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* User input summary */
+        .user-input-summary {
+            margin-top: 40px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .user-input-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .input-item {
+            margin-bottom: 10px;
+        }
+        .input-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .action-btn {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .action-btn:hover {
+            background-color: #0056b3;
+        }
+        .secondary-btn {
+            background-color: #6c757d;
+        }
+        .secondary-btn:hover {
+            background-color: #5a6268;
+        }
+
+        /* Conceptual art specific sections */
+        .concept-details {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+        }
+        .reflection-steps, .framework-steps, .creative-steps {
+            margin-bottom: 20px;
+        }
+        .concept-subtitle {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .concept-list {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        .concept-list li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .concept-text {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="navbar-container">
+            <h1>AIrtsy</h1>
+            <ul class="nav-links">
+                <li><a href="#">Exhibitions</a></li>
+                <li><a href="#">Artists</a></li>
+                <li><a href="#">Fairs & Collecting</a></li>
+                <li><a href="#">Quarterly</a></li>
+                <li><a href="#">News</a></li>
+                <li><a href="#">Locations</a></li>
+                <li><a href="#">Shop</a></li>
+                <li><a href="#">Premieres</a></li>
+            </ul>
+            <ul class="nav-actions">
+                <li><a href="#">Follow</a></li>
+                <li><a href="#">Search</a></li>
+            </ul>
+        </div>
+        <div class="event-info">
+            Opening reception: Wednesday, May 9, 6–8pm
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="container">
+        <div class="article-header">
+            <h1 class="article-title" id="article-title"></h1>
+            <div class="article-artist" id="artist-name"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="image-container">
+                <img id="main-image" src="" alt="Art Piece">
+            </div>
+            <div class="description-container">
+                <div class="label-text" id="label-text"></div>
+                <h2 class="section-title">About</h2>
+                <div class="description-text" id="description-text"></div>
+                
+                <div class="bio-container">
+                    <h2 class="section-title">Artist Bio</h2>
+                    <div class="bio-text" id="bio-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional works section -->
+        <div class="additional-works">
+            <h2 class="similar-works-title">Similar Works</h2>
+            <img id="additional-image" class="another-image" src="" alt="Additional Art Piece">
+        </div>
+
+        <!-- Conceptual art details (will be shown only for complicated mode) -->
+        <div class="concept-details hidden" id="concept-details">
+            <h2 class="section-title">Conceptual Art Development Process</h2>
+            
+            <div class="reflection-steps">
+                <h3 class="concept-subtitle">Reflection on Concept</h3>
+                <ul class="concept-list" id="reflection-list"></ul>
+            </div>
+            
+            <div class="framework-steps">
+                <h3 class="concept-subtitle">Conceptual Art Framework</h3>
+                <ul class="concept-list" id="framework-list"></ul>
+            </div>
+            
+            <div class="creative-steps">
+                <h3 class="concept-subtitle">Creative Development Steps</h3>
+                <ul class="concept-list" id="creative-steps-list"></ul>
+            </div>
+            
+            <div class="concept-details">
+                <h3 class="concept-subtitle">Material Used</h3>
+                <p class="concept-text" id="material-text"></p>
+            </div>
+        </div>
+
+        <!-- User input summary -->
+        <div class="user-input-summary">
+            <div class="user-input-title">Input Summary</div>
+            <div id="user-inputs"></div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="action-buttons">
+            <button class="action-btn secondary-btn" onclick="goBack()">Back to Mode Selection</button>
+            <button class="action-btn" onclick="saveToGallery()">Save to Gallery</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get data from sessionStorage
+            const artDataStr = sessionStorage.getItem('artData');
+            if (!artDataStr) {
+                alert('No art data found. Please create a new art piece.');
+                window.location.href = 'mode_selection.html';
+                return;
+            }
+            
+            const artData = JSON.parse(artDataStr);
+            displayArtData(artData);
+        });
+        
+        function displayArtData(data) {
+            // Set title and artist name
+            document.getElementById('article-title').textContent = data.title || 'Untitled Art Piece';
+            document.getElementById('artist-name').textContent = data.artistName || '';
+            
+            // Set images
+            if (data.generatedImageUrl) {
+                document.getElementById('main-image').src = data.generatedImageUrl;
+            }
+            if (data.additionalImageUrl) {
+                document.getElementById('additional-image').src = data.additionalImageUrl;
+            }
+            
+            // Set text content
+            if (data.label) {
+                document.getElementById('label-text').textContent = data.label;
+            }
+            if (data.description) {
+                document.getElementById('description-text').textContent = data.description;
+            }
+            if (data.bio) {
+                document.getElementById('bio-text').textContent = data.bio;
+            }
+            
+            // Handle mode-specific features
+            if (data.mode === 'complicated') {
+                document.getElementById('concept-details').classList.remove('hidden');
+                
+                // Populate conceptual art details
+                populateList('reflection-list', data.reflection);
+                populateList('framework-list', data.framework);
+                populateList('creative-steps-list', data.creativeSteps);
+                
+                if (data.material) {
+                    document.getElementById('material-text').textContent = data.material;
+                }
+            }
+            
+            // Populate user input summary
+            populateUserInputs(data);
+        }
+        
+        function populateList(elementId, text) {
+            if (!text) return;
+            
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            
+            text.split('\n').forEach(item => {
+                if (item.trim()) {
+                    const li = document.createElement('li');
+                    li.textContent = item.replace(/^[-•]/, '').trim();
+                    list.appendChild(li);
+                }
+            });
+        }
+        
+        function populateUserInputs(data) {
+            const container = document.getElementById('user-inputs');
+            container.innerHTML = '';
+            
+            // Common inputs
+            if (data.artistName) {
+                addInputItem(container, 'Artist Name', data.artistName);
+            }
+            if (data.artistIdentity) {
+                addInputItem(container, 'Artist Identity', data.artistIdentity);
+            }
+            
+            // Mode-specific inputs
+            if (data.mode === 'easy') {
+                if (data.theme) {
+                    addInputItem(container, 'Theme', data.theme);
+                }
+                if (data.imagery) {
+                    addInputItem(container, 'Imagery', data.imagery);
+                }
+            } else {
+                if (data.artDescription) {
+                    addInputItem(container, 'Art Description', data.artDescription);
+                }
+                if (data.material) {
+                    addInputItem(container, 'Material', data.material);
+                }
+            }
+        }
+        
+        function addInputItem(container, label, value) {
+            const div = document.createElement('div');
+            div.className = 'input-item';
+            
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'input-label';
+            labelSpan.textContent = label + ':';
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.textContent = value;
+            
+            div.appendChild(labelSpan);
+            div.appendChild(valueSpan);
+            container.appendChild(div);
+        }
+        
+        function goBack() {
+            window.location.href = 'mode_selection.html';
+        }
+        
+        function saveToGallery() {
+            // Get current art data
+            const artData = JSON.parse(sessionStorage.getItem('artData'));
+            
+            // Get existing gallery items or initialize empty array
+            let galleryItems = JSON.parse(localStorage.getItem('artGallery')) || [];
+            
+            // Add timestamp to art data
+            artData.savedAt = new Date().toISOString();
+            
+            // Add to gallery array
+            galleryItems.push(artData);
+            
+            // Save back to localStorage
+            localStorage.setItem('artGallery', JSON.stringify(galleryItems));
+            
+            alert('Art saved to gallery successfully!');
+            
+            // Redirect to gallery page
+            window.location.href = 'gallery.html';
+        }
+    </script>
+</body>
+</html> 

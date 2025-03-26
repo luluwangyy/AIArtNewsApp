@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Art Piece - AIrtsy</title>
+    <style>
+        body { 
+            margin: 0;
+            padding: 20px;
+            font-family: 'Palatino', Palatino, serif;
+        }
+
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #logo-display {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        #logo-display img {
+            width: 120px;
+        }
+
+        #topic-display { 
+            font-size: 44px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: black;
+        }
+
+        #name-display { 
+            font-size: 26px;
+            margin-bottom: 30px;
+        }
+
+        #image-display { 
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        #image-display img { 
+            max-width: 70%;
+            height: auto;
+        }
+
+        #description-display { 
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        #label-display { 
+            text-align: center;
+            color: grey;
+            font-style: italic;
+            font-size: 12px;
+            margin-bottom: 30px;
+        }
+
+        #about-display, #bio-title-display { 
+            text-align: center;
+            font-weight: bold;
+            font-size: 25px;
+            margin-bottom: 20px;
+        }
+
+        #bio-display { 
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+        }
+
+        .data-input-btn { background-color: #17a2b8; color: white; }
+        .edit-btn { background-color: #ffc107; color: black; }
+        .delete-btn { background-color: #dc3545; color: white; }
+        .gallery-btn { background-color: #28a745; color: white; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal input, .modal textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .modal textarea {
+            height: 100px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-container">
+        <div id="logo-display">
+            <img src="Artsy_logo.svg.png" alt="AIrtsy Logo">
+        </div>
+        
+        <div id="topic-display"></div>
+        <div id="name-display"></div>
+        <div id="image-display"></div>
+        <div id="label-display"></div>
+        <div id="about-display"></div>
+        <div id="description-display"></div>
+        <div id="bio-title-display"></div>
+        <div id="bio-display"></div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="action-button data-input-btn" onclick="window.location.href='easy_input.html'">Data Input</button>
+        <button class="action-button edit-btn" onclick="editArtPiece()">Edit</button>
+        <button class="action-button delete-btn" onclick="deleteArtPiece()">Delete</button>
+        <button class="action-button gallery-btn" onclick="window.location.href='gallery.html'">Back to Gallery</button>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Art Piece</h2>
+            <form id="edit-form">
+                <label>Title:</label>
+                <input type="text" id="edit-title">
+                
+                <label>Description:</label>
+                <textarea id="edit-description"></textarea>
+                
+                <label>Artist Name:</label>
+                <input type="text" id="edit-artist">
+                
+                <label>Artist Bio:</label>
+                <textarea id="edit-bio"></textarea>
+                
+                <div style="text-align: right; gap: 10px; display: flex; justify-content: flex-end;">
+                    <button type="button" onclick="closeEditModal()" style="padding: 8px 16px;">Cancel</button>
+                    <button type="submit" style="padding: 8px 16px; background: #28a745; color: white; border: none;">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const artId = urlParams.get('id');
+        let currentArtPiece = null;
+
+        function loadArtPiece() {
+            const artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+            console.log('Art Collection:', artCollection);
+            console.log('Looking for art ID:', artId);
+            currentArtPiece = artCollection.find(art => art.id === artId);
+            console.log('Found art piece:', currentArtPiece);
+
+            if (currentArtPiece) {
+                // Set default text while content loads
+                document.getElementById('topic-display').textContent = 'Loading...';
+                document.getElementById('name-display').textContent = currentArtPiece.artist || '';
+                document.getElementById('image-display').innerHTML = currentArtPiece.imageUrl ? 
+                    `<img src="${currentArtPiece.imageUrl}" alt="Art Piece">` : 'Loading image...';
+                document.getElementById('description-display').textContent = currentArtPiece.description || 'Loading description...';
+                document.getElementById('bio-title-display').textContent = "Artist Bio";
+                document.getElementById('bio-display').textContent = currentArtPiece.bio || '';
+                document.getElementById('about-display').textContent = "About";
+
+                // Remove loading text once content is available
+                if (currentArtPiece.title) document.getElementById('topic-display').textContent = currentArtPiece.title;
+                if (currentArtPiece.description) document.getElementById('description-display').textContent = currentArtPiece.description;
+            } else {
+                console.error('Art piece not found in collection');
+                alert('Art piece not found');
+                window.location.href = 'gallery.html';
+            }
+        }
+
+        function deleteArtPiece() {
+            if (confirm('Are you sure you want to delete this art piece?')) {
+                let artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+                artCollection = artCollection.filter(art => art.id !== artId);
+                localStorage.setItem('artCollection', JSON.stringify(artCollection));
+                window.location.href = 'gallery.html';
+            }
+        }
+
+        function editArtPiece() {
+            document.getElementById('edit-title').value = currentArtPiece.title || '';
+            document.getElementById('edit-description').value = currentArtPiece.description || '';
+            document.getElementById('edit-artist').value = currentArtPiece.artist || '';
+            document.getElementById('edit-bio').value = currentArtPiece.bio || '';
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+            const artIndex = artCollection.findIndex(art => art.id === artId);
+
+            if (artIndex !== -1) {
+                artCollection[artIndex] = {
+                    ...artCollection[artIndex],
+                    title: document.getElementById('edit-title').value,
+                    description: document.getElementById('edit-description').value,
+                    artist: document.getElementById('edit-artist').value,
+                    bio: document.getElementById('edit-bio').value
+                };
+                localStorage.setItem('artCollection', JSON.stringify(artCollection));
+                loadArtPiece();
+                closeEditModal();
+            }
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', loadArtPiece);
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('edit-modal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        }
+    </script>
+</body>
+</html> 

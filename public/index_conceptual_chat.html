@@ -87,6 +87,73 @@
     line-height: 1.7;
     font-size: 17px;
 }
+        .form-container {
+            position: relative;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px auto;
+            text-align: center;
+            max-width: 800px;
+            display: none;
+        }
+        .success-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .success-view {
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border: none;
+        }
+        .success-new {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            margin-left: 10px;
+        }
+        .loading-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+            margin: 10px 0;
+        }
+
+        .loading-btn.active {
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
    </style>
    <link rel="stylesheet" href="style1.css">
 </head>
@@ -115,53 +182,75 @@
     </div>
 
 
-    <div id="logo-display">
+    <div id="logo-display" style="display: none;">
         <img src="Artsy_logo.svg.png" alt="logo-note" style="width: 70%;">
     </div>
-    <div id="topic-display"></div>
+    <div id="topic-display">
+        <button type="button" class="loading-btn" id="title-loading">Generating Title...</button>
+    </div>
     <div id="name-display"></div>
-    <div id="image-display"></div>
+    <div id="image-display">
+        <button type="button" class="loading-btn" id="image-loading">Generating Image...</button>
+    </div>
 
     <div id="label-display"></div>
     <div id="about-display"></div>
-    <div id="description-display"></div>
+    <div id="description-display">
+        <button type="button" class="loading-btn" id="description-loading">Generating Description...</button>
+    </div>
     <div id="image-display-mid"></div>
     <div id="bio-title-display"></div>
-    <div id="bio-display"></div>
+    <div id="bio-display">
+        <button type="button" class="loading-btn" id="bio-loading">Generating Bio...</button>
+    </div>
 
     <div id="similar-display"></div>
     <div id="another-display"></div>
 
-    <div id="end-image-display" style="margin: 20px 0 0; width: 120%; position: relative; left: 0; bottom: 0;">
+    <div id="end-image-display" style="display: none; margin: 20px 0 0; width: 120%; position: relative; left: 0; bottom: 0;">
         <img src="foot.png" alt="foot-note" style="width: 100%;">
     </div>
 
-    <div id="top-image" >
+    <!--<div id="top-image" >
         <img src="artsy.jpg" alt="top-note" style="width: 100%;">
-    </div>
+    </div>-->
     
     
 
     <ul id="messages"></ul>
    
     <form id="image-form" style="bottom: 100px;">
-        <input id="image-input" autocomplete="off" placeholder="Enter your chat message" /><button>Chat Submit</button>
+        <input id="image-input" autocomplete="off" placeholder="Enter chat message if you have a collaborator (optional)" /><button>Chat Submit</button>
     </form>
 
     <form id="conceptual-form" style="bottom: 200px;">
-        <input id="theme-input" autocomplete="off" placeholder="any theme" />
-        <input id="imagery-input" autocomplete="off" placeholder="any imagery" />
+        <input id="theme-input" autocomplete="off" placeholder="input any noun" />
+        <input id="imagery-input" autocomplete="off" placeholder="input any imagery" />
         <button type="button" id="conceptual-submit">Submit</button>
     </form>
 
     <form id="bio-form" style="bottom: 150px;">
-        <input id="name-input" autocomplete="off" placeholder="any name" />
-        <input id="bio-input" autocomplete="off" placeholder="any identity" />
+        <input id="name-input" autocomplete="off" placeholder="input any name" />
+        <input id="bio-input" autocomplete="off" placeholder="input any identity" />
         <button type="button" onclick="submitBioForm()">Submit</button>
     </form>
-    <button id="hide-button" onclick="hideImage()">CLICK ME AFTER 5 seconds!</button>
+   
 
-    
+    <div class="form-container">
+        <div id="success-message" class="success-message">
+            <p>Art piece successfully created!</p>
+            <div class="success-actions">
+                <a href="#" id="success-view-link" class="btn success-view">View Art Piece</a>
+                <button id="success-new-btn" class="btn success-new">Create Another</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons" style="position: fixed; bottom: 20px; right: 10px; z-index: 9999; display: none;">
+        <button id="save-to-gallery" style="background: #28a745; border: none; padding: 5px 10px; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff;">Save Art Piece</button>
+        <button id="back-to-modes" style="background: #6c757d; border: none; padding: 5px 10px; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff;">Back to Modes</button>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
     const socket = io({
@@ -202,7 +291,38 @@
         }
     });
     
-    // Form submission handlers
+    // Get loading button elements
+    const titleLoading = document.getElementById('title-loading');
+    const imageLoading = document.getElementById('image-loading');
+    const descriptionLoading = document.getElementById('description-loading');
+    const bioLoading = document.getElementById('bio-loading');
+
+    // Function to show/hide loading buttons
+    function showLoading(element) {
+        element.classList.add('active');
+    }
+
+    function hideLoading(element) {
+        element.classList.remove('active');
+    }
+    
+    // Add these variables at the top of the script, after socket initialization
+    let lastSubmittedTheme = '';
+    let lastSubmittedImagery = '';
+    let lastSubmittedName = '';
+    let lastSubmittedBio = '';
+    let descriptionRetryCount = 0;
+    let descriptionTimeout = null;
+    const MAX_DESCRIPTION_RETRIES = 3;
+    const DESCRIPTION_TIMEOUT = 10000; // 15 seconds timeout
+    const RETRY_DELAY = 2000; // 2 seconds between retries
+
+    // Add these variables at the top of your script
+    let titleGenerated = false;
+    let imageGenerated = false;
+    let descriptionGenerated = false;
+    let bioGenerated = false;
+
     function handleConceptualSubmit(event) {
         event.preventDefault();
         console.log('Conceptual form submission started');
@@ -218,10 +338,43 @@
             alert('Please fill in both theme and imagery fields');
             return;
         }
+
+        // Show logo and end image after form submission
+        document.getElementById('logo-display').style.display = 'block';
+        document.getElementById('end-image-display').style.display = 'block';
+
+        // Store the input values before clearing
+        lastSubmittedTheme = theme;
+        lastSubmittedImagery = imagery;
     
+        // Show loading states
+        showLoading(titleLoading);
+        showLoading(imageLoading);
+        showLoading(descriptionLoading);
+
+        // Reset description retry count
+        descriptionRetryCount = 0;
+
+        // Clear any existing timeout
+        if (descriptionTimeout) {
+            clearTimeout(descriptionTimeout);
+        }
+
         try {
             console.log('Emitting submit concept event');
             socket.emit('submit concept', { theme, imagery });
+            
+            // Set timeout for description
+            descriptionTimeout = setTimeout(() => {
+                if (descriptionRetryCount < MAX_DESCRIPTION_RETRIES) {
+                    console.log(`Description timeout - retrying (attempt ${descriptionRetryCount + 1})`);
+                    retryDescription(theme, imagery);
+                } else {
+                    console.log('Max retries reached for description');
+                    hideLoading(descriptionLoading);
+                    alert('Description generation is taking longer than expected. Please try again.');
+                }
+            }, DESCRIPTION_TIMEOUT);
             
             // Add to chat history
             socket.emit('submit chat', `Theme: ${theme}`);
@@ -235,7 +388,31 @@
         } catch (error) {
             console.error('Error in conceptual form submission:', error);
             alert('Error submitting form. Please try again.');
+            hideLoading(descriptionLoading);
         }
+    }
+
+    function retryDescription(theme, imagery) {
+        descriptionRetryCount++;
+        console.log(`Retrying description generation - attempt ${descriptionRetryCount}`);
+        
+        // Clear previous timeout
+        if (descriptionTimeout) {
+            clearTimeout(descriptionTimeout);
+        }
+
+        // Emit the concept again
+        socket.emit('submit concept', { theme, imagery });
+
+        // Set new timeout
+        descriptionTimeout = setTimeout(() => {
+            if (descriptionRetryCount < MAX_DESCRIPTION_RETRIES) {
+                retryDescription(theme, imagery);
+            } else {
+                hideLoading(descriptionLoading);
+                alert('Description generation is taking longer than expected. Please try again.');
+            }
+        }, DESCRIPTION_TIMEOUT);
     }
     
     function submitBioForm() {
@@ -246,6 +423,14 @@
             alert('Please fill in both name and bio fields');
             return;
         }
+
+        // Show logo and end image after form submission
+        document.getElementById('logo-display').style.display = 'block';
+        document.getElementById('end-image-display').style.display = 'block';
+
+        // Store the input values before clearing
+        lastSubmittedName = name;
+        lastSubmittedBio = bio;
     
         socket.emit('submit bio', { name, bio });
         
@@ -261,12 +446,13 @@
         document.getElementById('bio-input').value = '';
     }
     
-    function hideImage() {
-        document.getElementById('top-image').style.display = 'none';
-    }
+     
     
     // Event listeners
-    conceptualSubmit.addEventListener('click', handleConceptualSubmit);
+    conceptualSubmit.addEventListener('click', () => {
+        resetGenerationFlags();
+        handleConceptualSubmit(event);
+    });
     conceptualForm.addEventListener('submit', (e) => e.preventDefault());
     
     imageForm.addEventListener('submit', (e) => {
@@ -302,12 +488,16 @@
     socket.on('new title', (title) => {
         if (title) {
             topicDisplay.textContent = title;
+            titleGenerated = true;
+            checkAllGenerationsComplete();
         }
     });
     
     socket.on('new image', (imageURL) => {
         if (imageURL) {
             imageDisplay.innerHTML = `<img src="${imageURL}" alt="Generated Image"/>`;
+            imageGenerated = true;
+            checkAllGenerationsComplete();
         }
     });
     
@@ -319,9 +509,26 @@
     });
     
     socket.on('new description', (description) => {
+        console.log('Received description:', description);
+        
+        if (descriptionTimeout) {
+            clearTimeout(descriptionTimeout);
+        }
+
         if (description) {
+            hideLoading(descriptionLoading);
             descriptionDisplay.textContent = description;
             aboutDisplay.textContent = "About";
+            descriptionRetryCount = 0;
+            descriptionGenerated = true;
+            checkAllGenerationsComplete();
+        } else if (descriptionRetryCount < MAX_DESCRIPTION_RETRIES) {
+            setTimeout(() => {
+                retryDescription(lastSubmittedTheme, lastSubmittedImagery);
+            }, RETRY_DELAY);
+        } else {
+            hideLoading(descriptionLoading);
+            console.error('Failed to generate description after max retries');
         }
     });
     
@@ -335,6 +542,8 @@
         if (description) {
             bioDisplay.textContent = description;
             bioTitleDisplay.textContent = "Artist Bio";
+            bioGenerated = true;
+            checkAllGenerationsComplete();
         }
     });
     
@@ -353,6 +562,114 @@
     socket.on('connect_error', (err) => {
         console.error('Connection error:', err.message);
     });
+
+    // Check if we are in Easy mode from mode selection page
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedMode = sessionStorage.getItem('selectedMode');
+        if (selectedMode !== 'easy') {
+            // If not coming from mode selection or not in easy mode, redirect to mode selection
+            sessionStorage.setItem('selectedMode', 'easy'); // Set default mode
+        }
+        
+        // Add event handlers for the buttons
+        document.getElementById('save-to-gallery').addEventListener('click', saveArtPiece);
+        document.getElementById('back-to-modes').addEventListener('click', function() {
+            window.location.href = 'mode_selection.html';
+        });
+        
+        // Set up success message event handlers
+        document.getElementById('success-new-btn').addEventListener('click', function() {
+            document.getElementById('success-message').style.display = 'none';
+        });
+    });
+
+    function saveArtPiece() {
+        // Get all the generated data
+        const imageUrl = document.querySelector('#image-display img')?.src;
+        const title = document.getElementById('topic-display').textContent;
+        const description = document.getElementById('description-display').textContent;
+        const artistName = document.getElementById('name-display').textContent;
+        const artistBio = document.getElementById('bio-display').textContent;
+        const label = document.getElementById('label-display').textContent;
+        
+        // Validate that we have the minimum required data
+        if (!imageUrl) {
+            alert('Please generate an image before saving.');
+            return;
+        }
+        
+        if (!title || !description) {
+            alert('Please complete the art generation process before saving.');
+            return;
+        }
+        
+        if (!artistName) {
+            alert('Please provide artist name before saving.');
+            return;
+        }
+        
+        // Create unique ID for the art piece
+        const artId = 'art_' + Date.now();
+        
+        // Create art piece object using the stored input values
+        const artPiece = {
+            id: artId,
+            title: title,
+            description: description,
+            artist: artistName,
+            bio: artistBio,
+            label: label,
+            imageUrl: imageUrl,
+            date: new Date().toISOString(),
+            creationMode: 'easy',
+            // Store original input using the stored values
+            originalInput: {
+                theme: lastSubmittedTheme,
+                imagery: lastSubmittedImagery,
+                name: lastSubmittedName,
+                bio: lastSubmittedBio
+            }
+        };
+        
+        console.log('Saving art piece:', artPiece);
+        
+        // Get existing collection or initialize new one
+        let artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+        
+        // Add new art piece
+        artCollection.push(artPiece);
+        
+        // Save to localStorage
+        localStorage.setItem('artCollection', JSON.stringify(artCollection));
+        
+        // Show success message
+        const successMessage = document.getElementById('success-message');
+        if (successMessage) {
+            successMessage.style.display = 'block';
+            // Hide the message after 3 seconds
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Redirect to the view page
+        window.location.href = `view.html?id=${artId}&new=true`;
+    }
+
+    function checkAllGenerationsComplete() {
+        if (titleGenerated && imageGenerated && descriptionGenerated && bioGenerated) {
+            document.querySelector('.action-buttons').style.display = 'block';
+        }
+    }
+
+    // Reset generation flags when starting new generation
+    function resetGenerationFlags() {
+        titleGenerated = false;
+        imageGenerated = false;
+        descriptionGenerated = false;
+        bioGenerated = false;
+        document.querySelector('.action-buttons').style.display = 'none';
+    }
     </script>
 </body>
 </html>

@@ -14,6 +14,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5500;
 
+// Load API keys from environment variables
+let replicateApiKey = process.env.REPLICATE_API_TOKEN || '';
+let openaiApiKey = process.env.OPENAI_API_KEY || '';
+
+// Debug API keys - mask them for security
+console.log('Replicate API key loaded:', replicateApiKey ? '✓ Key present (length: ' + replicateApiKey.length + ')' : '✗ Missing');
+console.log('OpenAI API key loaded:', openaiApiKey ? '✓ Key present (length: ' + openaiApiKey.length + ')' : '✗ Missing');
+
 const server = createServer(app);
 const io = new Server(server);
 
@@ -56,20 +64,40 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
 let prompts = [];
 let imageUrls = [];
 
-let replicateApiKey = '';
-let openaiApiKey = '';
-
 io.on('connection', (socket) => {
   console.log('A user connected');
 
   // Listen for the submission of API keys
   socket.on('submit api keys', (data) => {
-    console.log('API Keys received:', data);
+    if (!data.replicateApiKey || !data.openaiApiKey) {
+      console.error('One or both API keys missing in submission');
+      io.emit('error', 'Please provide both API keys');
+      return;
+    }
+
+    console.log('API Keys received - updating application keys');
     replicateApiKey = data.replicateApiKey;
     openaiApiKey = data.openaiApiKey;
+
+    // Log masked versions for debugging
+    console.log('Replicate API key updated:', replicateApiKey ? '✓ Key present (length: ' + replicateApiKey.length + ')' : '✗ Missing');
+    console.log('OpenAI API key updated:', openaiApiKey ? '✓ Key present (length: ' + openaiApiKey.length + ')' : '✗ Missing');
+    
+    // Send confirmation to client
+    io.emit('api keys confirmed', {
+      status: 'success',
+      message: 'API keys have been successfully stored'
+    });
   });
  
   socket.on('submit title', (data) => {
+    // Validate that OpenAI API key is available
+    if (!openaiApiKey) {
+      console.error('OpenAI API key missing. Please submit API keys first.');
+      io.emit('error', 'OpenAI API key missing. Please submit API keys first.');
+      return;
+    }
+
     const command = `python3 generate_title.py "${data}" "${openaiApiKey}"`;
     exec(command, (error, stdout, stderr) => {
       if (error || stderr) {
@@ -92,6 +120,13 @@ io.on('connection', (socket) => {
   });
   socket.on('submit bio', (data) => {
     console.log('bio Keys received');
+  
+    // Validate that OpenAI API key is available
+    if (!openaiApiKey) {
+      console.error('OpenAI API key missing. Please submit API keys first.');
+      io.emit('error', 'OpenAI API key missing. Please submit API keys first.');
+      return;
+    }
   
     const { name, bio } = data;
     const command = `python3 generate_bio.py "${name}" "${bio}" "${openaiApiKey}"`;
@@ -126,6 +161,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('submit label', (data) => {
+    // Validate that OpenAI API key is available
+    if (!openaiApiKey) {
+      console.error('OpenAI API key missing. Please submit API keys first.');
+      io.emit('error', 'OpenAI API key missing. Please submit API keys first.');
+      return;
+    }
   
     const command = `python3 generate_label.py "${data}" "${openaiApiKey}"`;
     exec(command, (error, stdout, stderr) => {
@@ -162,11 +203,19 @@ io.on('connection', (socket) => {
     prompts.push(prompt);
     io.emit('submit concept', prompt);
 
+    // Validate that API keys are available
+    if (!replicateApiKey || !openaiApiKey) {
+      console.error('API keys missing. Please submit API keys first.');
+      io.emit('error', 'API keys missing. Please submit API keys first.');
+      return;
+    }
+
     const { theme, imagery } = prompt;
     
     const command_idea = `python3 generate_conceptualart.py "${theme}" "${imagery}" "${replicateApiKey}" "${openaiApiKey}"`;
     const command_idea2 = `python3 generate_conceptualart2.py "${theme}" "${imagery}" "${replicateApiKey}" "${openaiApiKey}"`;
 
+    // Execute first concept art generation
     exec(command_idea, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
@@ -176,30 +225,63 @@ io.on('connection', (socket) => {
       try {
         const response = JSON.parse(stdout.trim());
         const description = response.description;
-        //const title = response.title.replace(/^"|"$/g, ''); // Remove surrounding quotes
-        
-        const descriptionMatch = description.match(/Description:([\s\S]*?)(?=\n\n|$)/);
-
-        //const descriptionMatchyy = descriptionMatch.match(/Description:([\s\S]*?)(?=\n\n|$)/);
         const title = extractTitle(description);
-
-
-        io.emit('new description', descriptionMatch);
-        //io.emit('new title', title); // Emit the cleaned title
-        //console.log("Description:", descriptionMatch);
+        
+        // Emit results as before
+        io.emit('new description', description.match(/Description:([\s\S]*?)(?=\n\n|$)/));
         console.log("Title:", title);
 
-        const url = response.url;
-        imageUrls.push(url);
-        io.emit('new image', url);
-        io.emit("new label and article title", title);
-
+        // If we got a URL directly from the script, use it
+        if (response.url) {
+          const url = response.url;
+          imageUrls.push(url);
+          io.emit('new image', url);
+          io.emit("new label and article title", title);
+        } 
+        // Otherwise, try to get the image URL from the extracted image prompt
+        else if (description && description.includes('--ar')) {
+          // Extract the image prompt from the description
+          let imagePrompt = description;
+          
+          // Use a temporary file for the long prompt
+          const tempPromptFile = `temp_concept_prompt_${Date.now()}.txt`;
+          const writePromptCommand = `echo '${imagePrompt.replace(/'/g, "'\\''")}' > ${tempPromptFile}`;
+          
+          exec(writePromptCommand, (error, stdout, stderr) => {
+            if (error || stderr) {
+              console.error('Error writing prompt to temp file:', error, stderr);
+              return;
+            }
+            
+            const generateImageCommand = `python3 generate_image.py "$(cat ${tempPromptFile})" "${replicateApiKey}"`;
+            
+            exec(generateImageCommand, (error, stdout, stderr) => {
+              // Clean up the temp file regardless of outcome
+              exec(`rm ${tempPromptFile}`);
+              
+              if (error) {
+                console.error('Error generating image:', error);
+                return;
+              }
+              
+              try {
+                const imageResponse = JSON.parse(stdout.trim());
+                const url = imageResponse.url;
+                imageUrls.push(url);
+                io.emit('new image', url);
+              } catch (err) {
+                console.error('Error parsing image response:', err);
+              }
+            });
+          });
+        }
       } catch (err) {
         console.error('Error processing output:', err);
         io.emit('error', 'Error processing image data');
       }
     });
 
+    // Second concept art generation
     exec(command_idea2, (error, stdout, stderr) => {
       if (error || stderr) {
         console.error('Error executing Python script:', error, stderr);
@@ -207,41 +289,242 @@ io.on('connection', (socket) => {
         return;
       }
       try {
-        //const titleLine = outputParts.find(line => line.startsWith('Title:'));
-       //const title = titleLine ? titleLine.split('Title:')[1].trim().replace(/^"|"$/g, '') : 'No title provided';
-       const response2 = JSON.parse(stdout.trim());
-       const description2 = response2.description;
+        const response2 = JSON.parse(stdout.trim());
+        const description2 = response2.description;
        
-       //io.emit('new description 2', description2);
-       console.log("Description 2:", description2);
+        console.log("Description 2:", description2);
 
-       //const title2 = response2.title;
+        // If we got a URL directly from the script, use it
+        if (response2.url) {
+          const url2 = response2.url;
+          imageUrls.push(url2);
+          io.emit('new image 2', url2);
+        }
+        // Otherwise, try to get the image URL from the extracted image prompt
+        else if (description2 && description2.includes('--ar')) {
+          // Use a temporary file for the long prompt
+          const tempPromptFile = `temp_concept2_prompt_${Date.now()}.txt`;
+          const writePromptCommand = `echo '${description2.replace(/'/g, "'\\''")}' > ${tempPromptFile}`;
+          
+          exec(writePromptCommand, (error, stdout, stderr) => {
+            if (error || stderr) {
+              console.error('Error writing prompt to temp file:', error, stderr);
+              return;
+            }
+            
+            const generateImageCommand = `python3 generate_image.py "$(cat ${tempPromptFile})" "${replicateApiKey}"`;
+            
+            exec(generateImageCommand, (error, stdout, stderr) => {
+              // Clean up the temp file regardless of outcome
+              exec(`rm ${tempPromptFile}`);
+              
+              if (error) {
+                console.error('Error generating image:', error);
+                return;
+              }
+              
+              try {
+                const imageResponse = JSON.parse(stdout.trim());
+                const url2 = imageResponse.url;
+                imageUrls.push(url2);
+                io.emit('new image 2', url2);
+              } catch (err) {
+                console.error('Error parsing image response:', err);
+              }
+            });
+          });
+        }
+      } catch (err) {
+        console.error('Error processing 2 output:', err);
+        io.emit('error', 'Error processing 2 image data');
+      }
+    });
 
-      ////const outputParts = stdout.split('\n');
-      ///// const url = outputParts[0];
+  });
+
+  // Process art description for conceptual art mode
+  socket.on('process_art_description', (data) => {
+    const artDescription = data.artDescription;
+    
+    // Check if API keys are available
+    if (!openaiApiKey) {
+      console.error('OpenAI API key missing. Please submit API keys first.');
+      io.emit('error', 'API keys missing. Please submit API keys first.');
+      return;
+    }
+    
+    // Generate reflection on the art description
+    const reflectionCommand = `python3 generate_reflection.py "${artDescription}" "${openaiApiKey}"`;
+    
+    exec(reflectionCommand, (error, stdout, stderr) => {
+      if (error || stderr) {
+        console.error('Error generating reflection:', error, stderr);
+        io.emit('error', 'Failed to process art description');
+        return;
+      }
       
-       
-       ////const descriptionStartIndex = outputParts.findIndex(line => line.startsWith('Description:')) + 1;
-     ////  let description = outputParts.slice(descriptionStartIndex).join('\n').trim();
-       
-       // Use a regular expression to remove text between [ and ]
-       //description = description.replace(/\[.*?\]/g, '').trim();
-      // io.emit("new label and article title", title2);
-       
-       console.log("Description:", description2);
-      // io.emit('new description', description2);
-
-       const url2 = response2.url;
-        imageUrls.push(url2);
-        io.emit('new image 2', url2);
-       
-
-     } catch (err) {
-       console.error('Error processing 2 output:', err);
-       io.emit('error', 'Error processing 2 image data');
-     }
-   });
-
+      try {
+        // Parse the response
+        const reflectionResponse = JSON.parse(stdout.trim());
+        const reflection = reflectionResponse.reflection;
+        
+        // Generate framework based on reflection
+        const frameworkCommand = `python3 generate_framework.py "${reflection}" "${openaiApiKey}"`;
+        
+        exec(frameworkCommand, (error, stdout, stderr) => {
+          if (error || stderr) {
+            console.error('Error generating framework:', error, stderr);
+            io.emit('error', 'Failed to generate conceptual framework');
+            return;
+          }
+          
+          try {
+            // Parse the response
+            const frameworkResponse = JSON.parse(stdout.trim());
+            const framework = frameworkResponse.framework;
+            
+            // Send both reflection and framework back to client
+            socket.emit('art_description_processed', {
+              reflection: reflection,
+              framework: framework
+            });
+            
+          } catch (parseError) {
+            console.error('Error parsing framework response:', parseError);
+            socket.emit('error', 'Error processing framework data');
+          }
+        });
+        
+      } catch (parseError) {
+        console.error('Error parsing reflection response:', parseError);
+        socket.emit('error', 'Error processing reflection data');
+      }
+    });
+  });
+  
+  // Process material input for conceptual art mode
+  socket.on('process_material', (data) => {
+    const { material, framework } = data;
+    
+    // Validate that API keys are available
+    if (!replicateApiKey || !openaiApiKey) {
+      console.error('API keys missing. Please submit API keys first.');
+      io.emit('error', 'API keys missing. Please submit API keys first.');
+      return;
+    }
+    
+    // Generate creative steps based on framework and material
+    const creativeStepsCommand = `python3 generate_creative_steps.py "${material}" "${framework}" "${openaiApiKey}"`;
+    
+    exec(creativeStepsCommand, (error, stdout, stderr) => {
+      if (error || stderr) {
+        console.error('Error generating creative steps:', error, stderr);
+        io.emit('error', 'Failed to generate creative steps');
+        return;
+      }
+      
+      try {
+        // Parse the response
+        const stepsResponse = JSON.parse(stdout.trim());
+        const creativeSteps = stepsResponse.creativeSteps;
+        
+        // Encode the creative steps to avoid command line issues with quotes and special chars
+        const creativeStepsBase64 = Buffer.from(creativeSteps).toString('base64');
+        
+        // Generate concept based on creative steps
+        const conceptCommand = `python3 generate_concept.py "${creativeStepsBase64}" "${material}" "${openaiApiKey}"`;
+        
+        exec(conceptCommand, (error, stdout, stderr) => {
+          if (error || stderr) {
+            console.error('Error generating concept:', error, stderr);
+            io.emit('error', 'Failed to generate concept');
+            return;
+          }
+          
+          try {
+            // Parse the response
+            const conceptResponse = JSON.parse(stdout.trim());
+            const concept = conceptResponse.concept;
+            
+            // Encode the concept to avoid command line issues
+            const conceptBase64 = Buffer.from(concept).toString('base64');
+            
+            // Generate image prompt based on concept
+            const imagePromptCommand = `python3 generate_image_prompt.py "${conceptBase64}" "${material}" "${openaiApiKey}"`;
+            
+            exec(imagePromptCommand, (error, stdout, stderr) => {
+              if (error || stderr) {
+                console.error('Error generating image prompt:', error, stderr);
+                io.emit('error', 'Failed to generate image prompt');
+                return;
+              }
+              
+              try {
+                // Parse the response
+                const promptResponse = JSON.parse(stdout.trim());
+                const imagePrompt = promptResponse.imagePrompt;
+                
+                // Generate actual image using Replicate
+                // Use a temporary file approach for long prompts
+                const tempPromptFile = `temp_prompt_${Date.now()}.txt`;
+                const writePromptCommand = `echo '${imagePrompt.replace(/'/g, "'\\''")}' > ${tempPromptFile}`;
+                
+                exec(writePromptCommand, (error, stdout, stderr) => {
+                  if (error || stderr) {
+                    console.error('Error writing prompt to temp file:', error, stderr);
+                    io.emit('error', 'Failed to generate image');
+                    return;
+                  }
+                  
+                  const generateImageCommand = `python3 generate_image.py "$(cat ${tempPromptFile})" "${replicateApiKey}"`;
+                  
+                  exec(generateImageCommand, (error, stdout, stderr) => {
+                    if (error) {
+                      console.error('Error generating image:', error);
+                      io.emit('error', 'Failed to generate image');
+                      return;
+                    }
+                    
+                    // Clean up the temp file
+                    exec(`rm ${tempPromptFile}`);
+                    
+                    try {
+                      // Parse the image URL
+                      const imageResponse = JSON.parse(stdout.trim());
+                      const imageUrl = imageResponse.url;
+                      
+                      // Send all data back to client
+                      io.emit('material_processed', {
+                        creativeSteps: creativeSteps,
+                        concept: concept,
+                        imagePrompt: imagePrompt,
+                        imageUrl: imageUrl
+                      });
+                      
+                    } catch (parseError) {
+                      console.error('Error parsing image response:', parseError);
+                      io.emit('error', 'Error processing image data');
+                    }
+                  });
+                });
+                
+              } catch (parseError) {
+                console.error('Error parsing image prompt response:', parseError);
+                io.emit('error', 'Error processing image prompt');
+              }
+            });
+            
+          } catch (parseError) {
+            console.error('Error parsing concept response:', parseError);
+            io.emit('error', 'Error processing concept data');
+          }
+        });
+        
+      } catch (parseError) {
+        console.error('Error parsing creative steps response:', parseError);
+        io.emit('error', 'Error processing creative steps data');
+      }
+    });
   });
 
 });
@@ -250,7 +533,80 @@ app.get('/', (req, res) => {
   res.sendFile(join(__dirname, 'public/home.html'));
 });
 
+app.get('/api', (req, res) => {
+  res.sendFile(join(__dirname, 'public/api.html'));
+});
+
+app.get('/mode-selection', (req, res) => {
+  res.sendFile(join(__dirname, 'public/mode_selection.html'));
+});
+
+app.get('/gallery', (req, res) => {
+  res.sendFile(join(__dirname, 'public/gallery.html'));
+});
+
+// Add new routes for art piece management
+app.post('/api/art', (req, res) => {
+  try {
+    const artData = req.body;
+    
+    // Validate required fields
+    if (!artData.title || !artData.artist || !artData.description || !artData.imageUrl) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // Generate a unique ID for the art piece
+    artData.id = Date.now().toString();
+    artData.date = new Date().toISOString();
+    
+    console.log('Creating new art piece:', artData.title);
+    
+    // Return the created art piece with its new ID
+    res.status(201).json(artData);
+  } catch (error) {
+    console.error('Error creating art piece:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.put('/api/art/:id', (req, res) => {
+  try {
+    const artId = req.params.id;
+    const updatedData = req.body;
+    
+    // Validate required fields
+    if (!updatedData.title || !updatedData.artist || !updatedData.description) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    console.log('Updating art piece:', artId);
+    
+    // Return the updated art piece
+    res.json({
+      ...updatedData,
+      id: artId,
+      lastUpdated: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating art piece:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/api/art/:id', (req, res) => {
+  try {
+    const artId = req.params.id;
+    
+    console.log('Deleting art piece:', artId);
+    
+    // Return success response
+    res.json({ success: true, message: 'Art piece deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting art piece:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

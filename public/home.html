@@ -3,53 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
+    <title>AIrtsy - Welcome</title>
     <style>
-        body, html {
-            height: 100%;
+        body {
             margin: 0;
+            padding: 0;
             font-family: 'Palatino', Palatino, serif;
+            background-color: #f8f8f8;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-        .bg {
-            /* Replace 'background.jpg' with your actual image file */
-            background-image: url('home.png');
-            height: 100%;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-        .centered-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+
+        .logo {
+            margin-bottom: 40px;
             text-align: center;
-            color: white;
         }
-        button {
-            font-size: 16px;
-            font-family: 'Palatino', Palatino, serif;
-            padding: 10px 20px;
-            cursor: pointer;
+
+        .logo img {
+            width: 150px;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .start-button {
+            padding: 15px 40px;
+            font-size: 1.2rem;
             background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 5px;
-            margin-top: 20px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
-        button:hover {
-            background-color: white;
+
+        .start-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .tagline {
+            margin-top: 20px;
+            color: #666;
+            font-size: 1.1rem;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="bg">
-        <div class="centered-content">
-            <h1>Authenticity, Accuracy, Accountability </h1>
-            <button onclick="window.location.href='api.html';">Start</button>
-            
-            
-        </div>
+    <div class="logo">
+        <img src="Artsy_logo.svg.png" alt="AIrtsy Logo">
     </div>
+    <h1>Welcome to AIrtsy</h1>
+    <a href="api.html" class="start-button">Start Creating</a>
+    <p class="tagline">Transform your ideas into AI-powered art</p>
 </body>
 </html>

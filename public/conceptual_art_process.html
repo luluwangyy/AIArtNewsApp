@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conceptual Art Creation Process</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Palatino', Palatino, serif;
+            background-color: #f8f8f8;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            color: #444;
+        }
+        .step-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .step-number {
+            background-color: #007BFF;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .step-title {
+            font-size: 1.5rem;
+            margin: 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Palatino', Palatino, serif;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        .result-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .reflection, .framework, .creative-steps, .concept {
+            margin-bottom: 20px;
+        }
+        .reflection h3, .framework h3, .creative-steps h3, .concept h3 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .hidden {
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #007BFF;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conceptual Art Creation Process</h1>
+        
+        <!-- Step 1: Art Description -->
+        <div class="step-container" id="step1">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h2 class="step-title">Art Description</h2>
+            </div>
+            <p>Begin by describing an art piece you envision. Be as descriptive and conceptual as possible.</p>
+            <div class="form-group">
+                <label for="art-description">Art Description:</label>
+                <textarea id="art-description" placeholder="Describe a conceptual art piece you have in mind..."></textarea>
+            </div>
+            <div class="button-container">
+                <button onclick="window.location.href='mode_selection.html'" class="secondary">Back to Modes</button>
+                <button onclick="submitArtDescription()">Next Step</button>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div class="loading hidden" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Processing your input...</p>
+        </div>
+        
+        <!-- Step 2: Reflection and Framework -->
+        <div class="step-container hidden" id="step2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h2 class="step-title">Reflection and Framework</h2>
+            </div>
+            <div class="reflection">
+                <h3>Reflection on Your Concept:</h3>
+                <ul id="reflection-list"></ul>
+            </div>
+            <div class="framework">
+                <h3>Conceptual Art Framework:</h3>
+                <ul id="framework-list"></ul>
+            </div>
+            <div class="form-group">
+                <label for="material-input">Select Material for Your Art:</label>
+                <input type="text" id="material-input" placeholder="e.g., wood, metal, paper, digital media, etc.">
+            </div>
+            <div class="button-container">
+                <button onclick="backToStep1()" class="secondary">Back</button>
+                <button onclick="submitMaterial()">Generate Concept</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Final Result -->
+        <div class="step-container hidden" id="step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h2 class="step-title">Your Conceptual Art</h2>
+            </div>
+            <div class="creative-steps">
+                <h3>Creative Development Steps:</h3>
+                <ul id="creative-steps-list"></ul>
+            </div>
+            <div class="concept">
+                <h3>Conceptual Art Installation:</h3>
+                <p id="concept-text"></p>
+            </div>
+            <div class="text-to-image">
+                <h3>Visual Representation:</h3>
+                <p id="image-prompt-text"></p>
+                <div id="generated-image" style="margin-top: 20px; text-align: center;"></div>
+            </div>
+            <div class="form-group">
+                <label for="artist-name">Artist Name:</label>
+                <input type="text" id="artist-name" placeholder="Enter your name or pseudonym">
+            </div>
+            <div class="form-group">
+                <label for="artist-identity">Artist Identity:</label>
+                <input type="text" id="artist-identity" placeholder="Brief description of your artistic identity">
+            </div>
+            <div class="button-container">
+                <button onclick="backToStep2()" class="secondary">Back</button>
+                <button onclick="completeProcess()">Create Art News</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let artDescription, reflection, framework, material, creativeSteps, concept, imagePrompt;
+        let generatedImageUrl;
+        
+        // Step Navigation
+        async function submitArtDescription() {
+            artDescription = document.getElementById('art-description').value.trim();
+            
+            // Enhanced input validation
+            if (!artDescription) {
+                alert('Please provide a description of your art piece.');
+                return;
+            }
+            
+          
+            // Check for valid characters and potential injection
+            if (!/^[a-zA-Z0-9\s.,!?'"()-_\n]+$/.test(artDescription)) {
+                alert('Please use only letters, numbers, and basic punctuation in your description.');
+                return;
+            }
+
+            // Check for reasonable length
+            if (artDescription.length > 1000) {
+                alert('Description is too long. Please keep it under 1000 characters.');
+                return;
+            }
+            
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            
+            retryCount = 0;
+            
+            try {
+                await tryProcessArtDescription();
+            } catch (error) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('step1').classList.remove('hidden');
+                handleFrameworkError(error);
+            }
+        }
+        
+        async function tryProcessArtDescription() {
+            const startTime = Date.now();
+            
+            return new Promise((resolve, reject) => {
+                const timeoutId = setTimeout(() => {
+                    reject(new Error('Request timed out'));
+                }, (retryCount + 1) * 10000);
+                
+                socket.emit('process_art_description', { 
+                    artDescription,
+                    retry: retryCount 
+                });
+                
+                socket.once('art_description_processed', (data) => {
+                    clearTimeout(timeoutId);
+                    resolve(data);
+                });
+                
+                socket.once('error', (error) => {
+                    clearTimeout(timeoutId);
+                    reject(error);
+                });
+            }).catch(async (error) => {
+                console.error(`Attempt ${retryCount + 1} failed:`, error);
+                
+                if (retryCount < MAX_RETRIES) {
+                    retryCount++;
+                    // Exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+                    return tryProcessArtDescription();
+                } else {
+                    throw error;
+                }
+            });
+        }
+        
+        function backToStep1() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            retryCount = 0;
+        }
+        
+        function submitMaterial() {
+            material = document.getElementById('material-input').value.trim();
+            
+            if (!material) {
+                alert('Please specify a material for your art piece.');
+                return;
+            }
+
+            // Validate material input
+            if (material.length < 3) {
+                alert('Please provide a more specific material description.');
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9\s,]+$/.test(material)) {
+                alert('Please use only letters, numbers, and commas in your material description.');
+                return;
+            }
+            
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('loading').classList.remove('hidden');
+            
+            // Send to server for processing
+            socket.emit('process_material', { 
+                material,
+                framework,
+                reflection
+            });
+        }
+        
+        function backToStep2() {
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+        }
+        
+        function completeProcess() {
+            const artistName = document.getElementById('artist-name').value.trim();
+            const artistIdentity = document.getElementById('artist-identity').value.trim();
+            
+            if (!artistName || !artistIdentity) {
+                alert('Please provide both artist name and identity.');
+                return;
+            }
+
+            // Show loading indicator
+            document.getElementById('loading').classList.remove('hidden');
+
+            // First generate the bio
+            socket.emit('submit bio', {
+                name: artistName,
+                bio: artistIdentity
+            });
+
+            // Listen for the generated bio
+            socket.once('new bio', function(generatedBio) {
+                // Create unique ID for the art piece
+                const artId = 'art_' + Date.now();
+                
+                // Create art piece object
+                const artPiece = {
+                    id: artId,
+                    title: concept.split('.')[0] || 'Untitled Concept',
+                    description: concept,
+                    artist: artistName,
+                    bio: generatedBio,
+                    label: material,
+                    imageUrl: generatedImageUrl,
+                    imageUrl2: window.secondImageUrl,
+                    date: new Date().toISOString(),
+                    creationMode: 'complicated',
+                    originalInput: {
+                        artDescription: artDescription,
+                        theme: artDescription,
+                        imagery: material,
+                        name: artistName,
+                        bio: artistIdentity
+                    },
+                    conceptualData: {
+                        reflection: reflection,
+                        framework: framework,
+                        creativeSteps: creativeSteps,
+                        imagePrompt: imagePrompt
+                    }
+                };
+                
+                console.log('Saving art piece:', artPiece);
+                
+                // Get existing collection or initialize new one
+                let artCollection = JSON.parse(localStorage.getItem('artCollection')) || [];
+                
+                // Add new art piece
+                artCollection.push(artPiece);
+                
+                // Save to localStorage
+                localStorage.setItem('artCollection', JSON.stringify(artCollection));
+
+                // Hide loading indicator
+                document.getElementById('loading').classList.add('hidden');
+                
+                // Redirect to view page
+                window.location.href = `view.html?id=${artId}&new=true`;
+            });
+
+            // Handle potential error in bio generation
+            socket.once('error', function(error) {
+                console.error('Error generating bio:', error);
+                document.getElementById('loading').classList.add('hidden');
+                alert('Error generating artist bio. Please try again.');
+            });
+        }
+        
+        // Socket event listeners with enhanced error handling
+        socket.on('art_description_processed', function(data) {
+            document.getElementById('loading').classList.add('hidden');
+            
+            try {
+                if (!data) {
+                    throw new Error('No data received from server');
+                }
+                
+                if (!data.reflection || !data.framework) {
+                    throw new Error('Incomplete framework data');
+                }
+                
+                document.getElementById('step2').classList.remove('hidden');
+                
+                reflection = data.reflection;
+                framework = data.framework;
+                
+                // Populate reflection list
+                const reflectionList = document.getElementById('reflection-list');
+                reflectionList.innerHTML = '';
+                
+                reflection.split('\n').forEach(item => {
+                    if (item.trim()) {
+                        const li = document.createElement('li');
+                        li.textContent = item.replace(/^[-•]/, '').trim();
+                        reflectionList.appendChild(li);
+                    }
+                });
+                
+                // Populate framework list
+                const frameworkList = document.getElementById('framework-list');
+                frameworkList.innerHTML = '';
+                
+                framework.split('\n').forEach(item => {
+                    if (item.trim()) {
+                        const li = document.createElement('li');
+                        li.textContent = item.replace(/^[-•]/, '').trim();
+                        frameworkList.appendChild(li);
+                    }
+                });
+            } catch (error) {
+                console.error('Error processing art description:', error);
+                document.getElementById('step1').classList.remove('hidden');
+                handleFrameworkError(error);
+            }
+        });
+        
+        socket.on('material_processed', function(data) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('step3').classList.remove('hidden');
+            
+            creativeSteps = data.creativeSteps;
+            concept = data.concept;
+            imagePrompt = data.imagePrompt;
+            generatedImageUrl = data.imageUrl;
+            
+            // Populate creative steps list
+            const stepslist = document.getElementById('creative-steps-list');
+            stepslist.innerHTML = '';
+            
+            creativeSteps.split('\n').forEach(item => {
+                if (item.trim()) {
+                    const li = document.createElement('li');
+                    li.textContent = item.replace(/^[-•]/, '').trim();
+                    stepslist.appendChild(li);
+                }
+            });
+            
+            // Set concept text
+            document.getElementById('concept-text').textContent = concept;
+            
+            // Set image prompt
+            document.getElementById('image-prompt-text').textContent = imagePrompt;
+            
+            // Display generated image if available
+            if (generatedImageUrl) {
+                document.getElementById('generated-image').innerHTML = `
+                    <img src="${generatedImageUrl}" alt="Generated Art Concept" style="max-width: 100%; border-radius: 5px;">
+                `;
+            }
+        });
+        
+        // Add listener for second image
+        socket.on('new image 2', function(imageUrl) {
+            if (imageUrl) {
+                window.secondImageUrl = imageUrl;
+                // Add second image to the display
+                const generatedImageDiv = document.getElementById('generated-image');
+                const secondImageDiv = document.createElement('div');
+                secondImageDiv.style.marginTop = '20px';
+                secondImageDiv.innerHTML = `
+                    <img src="${imageUrl}" alt="Generated Art Concept 2" style="max-width: 100%; border-radius: 5px;">
+                `;
+                generatedImageDiv.appendChild(secondImageDiv);
+            }
+        });
+        
+        // Add retry functionality for art description submission
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+        
+        // Add new error handling function
+        function handleFrameworkError(error) {
+            let errorMessage = 'Failed to generate conceptual framework. ';
+            
+            // Check for specific error types
+            if (error.message.includes('No data received')) {
+                errorMessage += 'The server did not respond. Please try again.';
+            } else if (error.message.includes('Incomplete framework')) {
+                errorMessage += 'The generated framework was incomplete. Please try providing more details in your description.';
+            } else {
+                errorMessage += 'Please try:\n\n' +
+                    '1. Being more specific in your description\n' +
+                    '2. Using clearer language\n' +
+                    '3. Avoiding overly complex concepts\n' +
+                    '4. Breaking down your idea into simpler parts';
+            }
+            
+            alert(errorMessage);
+            
+            // Reset state
+            reflection = null;
+            framework = null;
+            retryCount = 0;
+        }
+    </script>
+</body>
+</html> 

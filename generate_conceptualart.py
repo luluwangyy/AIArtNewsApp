@@ -44,7 +44,7 @@ def generate_visual_artist_reference(imagery):
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": f"Please ONLY give me the name of an artwork of a visual artist that has depicted {imagery}"}
+                {"role": "user", "content": f"Please ONLY give me the name of an artwork of a visual artist that has depicted {imagery}. Please do not say Van Gogh"}
             ],
             temperature=0.5
         )
@@ -86,6 +86,15 @@ def main():
     imagery = sys.argv[2]
     replicate_api_key = sys.argv[3]
     openai_api_key = sys.argv[4]
+
+    # Validate API keys
+    if not replicate_api_key:
+        print(json.dumps({"error": "Replicate API key cannot be empty"}))
+        sys.exit(1)
+    
+    if not openai_api_key:
+        print(json.dumps({"error": "OpenAI API key cannot be empty"}))
+        sys.exit(1)
 
     # Set API keys
     os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
